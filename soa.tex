@@ -1,0 +1,18 @@
+\chapter{State of the Art}
+\label{cha:intro}
+
+Event detection using social networks is already a common practice. The literature offers many example of global scale event detection based on the analysis of social media contents, such as real-time earthquake identification based on tweets \cite{sakaki2010earthquake}, breaking news discovery in Twitter \cite{jackoway2011identification, phuvipadawat2010breaking}, or big gigs recognition observing the frequency of posts on Flickr \cite{liu2011using}.
+
+Event prediction using social network contents is also pretty common: the most striking example of the last few years is the 2016 american elections. In fact, while many of the official polls made by the most famous american newspapers and televisions had always forecasted Hillary Clinton as winner, social media reactions were increasingly in favor of the Republicans \cite{elections}, and the rest is history. Other cases of event prediction using social media are, for example, movie box-office \cite{asur2010predicting} or Oscars-winner forecasts.
+
+There is much less literature about life-event detection, which will be briefly described in the following section.
+
+\section{Life event detectors}
+\label{sec:classifiers}
+The core of the literature is focused on life event identification in textual contents taken from social networks. All the models proposed in scientific papers and articles follow a similar pattern. Firstly, fix a set of life events to search for is fixed(e.g. getting married, birth of a child, buy a new house, etc.), then data is fetch from social media, analysing or labelling it, and finally a machine learning classifier is trained and tested. Each of previous steps is executed in several ways, in particular:
+\begin{itemize}
+\item Data is downloaded following two different philosophies. Some authors prefer to fetch only contents that contain specific keywords (such as "\textit{engagement}" for marriage) \cite{dickinson2015identifying, cavalinclassification, moyanolife, khobarekar2013detecting}, some other search for contents randomly, considering a text related to the life event if it contains at least one keyword \cite{choudhury2014personal, di2013detecting}.
+\item Feature estraction is done in several ways, mainly in two separate clusters - syntax analysis, using bag-of-words or bag-of-N-grams \cite{cavalinclassification, di2013detecting, li2014major} - semantic analysis, such as sentiment, formality, etc \cite{khobarekar2013detecting}. In addition to that, some models consider also "external" features, like user's behaviour or post success.
+\item The majority of models consider only a single post at a time, while \cite{cavalin2015multiple, moyanolife} consider the reaction and the conversation related to a main post.
+\end{itemize}
+For our purpose, these cited models have several weaknesses. First of all, they are only classifiers that tell if a post is about or not to a life event, they don't go further on author history. Furthermore, a post related to a life event may not be concerned with the author (e.g. participate to a wedding instead of getting married). In addiction, there is no time reference: a post can be about something in the past, in the present or in the future. Last but not least, all these models are focused only on Twitter, and only on texts.
