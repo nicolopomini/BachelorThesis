@@ -1,11 +1,11 @@
 \chapter{Architecture}
 \label{cha:architecture}
 
-\dots
+In this chapter the architecture of the system will be exposed. The whole can be seen as a web service that exposes some REST API, and internally deals with social network interaction and data analysis. Firstly, a logical explaination of the process will be given, secondly the API will be officialy exposed, and finally a complete view on the architecture will be provided.
 
 \section{Solution design}
 \label{sec:design}
-This section describes the specifications of the functionalities of the system. Each functionality is a logical group of actions whose purpose is to carry out a section of the job required to go from row data - a user identifier - to a piece of information - the answer to the question "Has this person lived a life event?". The steps are the following:
+This section describes the specifications of the functionalities of the system. Each functionality is a logical group of actions whose purpose is to carry out a section of the job required to go from row data - a user identifier - to a piece of information - the answer to the question "Has this person lived a life event?". The steps are the following, as shown in figure~\ref{fig:nutshell}:
 \begin{enumerate}
 \item Collect activities from social networks.
 \item Extract semantic entities from social network contents.
@@ -51,7 +51,17 @@ As output, a label indicating "Y" or "N" is expected (of course "Y" in case the 
 The feature extraction method can be decided a priori, or it can be setted as parameter: using only \textit{text features} - the words that compose the text of each post - or use only \textit{entity features} - the semantic entities for reasoning on the meaning of the post, or use them both together. This choice should be made paying attention to the available datasets to train the classifier: in fact, if \textit{text features} are chosen, at least a different dataset for each language supported has to be provided.
 
 \subsection{Computation performer}
-This last function has the goal to analyze the user's timeline to discover a life event in it. Since a life event is something important and rare into a user's life, the assumption is that also in his/her social life his/her behaviour is different when the event is approaching or is in progress. For this reason some unusual patterns, related to the life event itself or to the average success of the posts, are searched for. The idea is that a user does not publishes contents about, for examples, a new baby, very usually, but only when something important is about to happen. In addition to that, a post about a new baby announcement gets probably more feedbacks compared to a normal post, such as congratulation messages. The detection of a life event is based on these routine changes, which can be various: a slow but constant increase of interest before the event, or a sudden peak when the event is happening. In general, the relative frequency of activities related to the life event itself is monitored.
+\label{sec:computationperformer}
+
+\begin{figure}
+\centering
+\includegraphics[width=%
+0.8\textwidth]{img/bale}
+\caption{The success collected by this account is high when it talks about a life event (the two red vertical line represent the pubblication of two posts related to the birth of a child).}
+\label{fig:bale}
+\end{figure}
+
+This last function has the goal to analyze the user's timeline to discover a life event in it. Since a life event is something important and rare into a user's life, the assumption is that also in his/her social life his/her behaviour is different when the event is approaching or is in progress. For this reason some unusual patterns, related to the life event itself or to the average success of the posts, are searched for. The idea is that a user does not publishes contents about, for examples, a new baby, very usually, but only when something important is about to happen. In addition to that, a post about a new baby announcement gets probably more feedbacks compared to a normal post, such as congratulation messages. The detection of a life event is based on these routine changes, which can be various: a slow but constant increase of interest before the event, or a sudden peak when the event is happening. In general, the relative frequency of activities related to the life event itself is monitored. As shown in figure~\ref{fig:bale}, when the user talks about a life event, the success of his/her post tends to be high.
 At this point, a timeline is composed by a list of Y/N label, each one with a timestamp attached. For each day $d$ the user has been active on social media (those days in which the user published something), the frequency $f$ is computed as follows:
 \[
 f(d) = \frac{r(d)}{all(d)}
@@ -70,9 +80,353 @@ There are several parameter for this phase:
 \end{itemize}
 
 \section{Exposed APIs}
+\label{sec:APIs}
 
-TBD properly.
+In this section the APIs offered by the system will be defined. These interfaces are RESTful APIs, which expose the main resources available in the system: \texttt{User}, \texttt{Download Request} and \texttt{Computation}. For each resource, the possibilities to retrieve and create new istances are offered, and for the user resource is also possible to edit an istance. In the following subsections more details will be provided. 
 
-In linea di massima: 1) esiste l'utente X? 2) Aggiungi l'utente X 3) Scarica l'ultimo mese/settimana dell'utente X 4) L'utente X ha vissuto il life event Y (con i dati presenti)?
+\subsection{User information {[}\protect\texttt{/user}{]}}
+\label{sec:APIuser}
+
+\subsubsection{Get a specific User {[}\protect\texttt{GET}{]}}
+
+Get all the information about a specific user. It's possible to search using the user ID given by the system, or with the ID of a social network (At least one parameter must be specified).
+
+\begin{itemize}
+\item
+  Parameters:
+
+  \begin{itemize}
+  \item
+    \textit{userid}: user's identifier. (\texttt{string})
+  \item
+    \textit{facebookid}: user's Facebook ID. (\texttt{string})
+  \item
+    \textit{twitterid}: user's Twitter ID. (\texttt{string})
+  \item
+    \textit{instagramid}: user's Instagram ID. (\texttt{string})
+  \end{itemize}
+\item
+  Response 200 (\texttt{application/json})
+
+\begin{verbatim}
+  {
+      "ok": "true",
+      "result": {
+          "userid": "12dfdbGRqaS34D5Hth5PaXsw",
+          "name": "Pinco Pallino",
+          "twitter": {
+              "name": "pincopallino",
+              "id": "2565227499"
+          },
+          "facebook": {
+              "name": "Pinco Pallino",
+              "id": "2228804402"
+          },
+          "instagram": {
+              "name": "pinco_pallino",
+              "id": "388926121"
+          }
+      }
+  }
+\end{verbatim}
+\item
+  Response 404 (\texttt{application/json})
+
+\begin{verbatim}
+  {
+      "ok": "false",
+      "error": "User ID does not exist."
+  }
+\end{verbatim}
+\end{itemize}
+
+\subsubsection{Create a new User{[}\protect\texttt{POST}{]}}
+
+Add a user to the system, specifying the user's IDs among the social networks to analyze. At least one social ID must be specified.
+
+\begin{itemize}
+\item
+  Parameters:
+
+  \begin{itemize}
+  \item
+    \textit{name}: user's name (\texttt{string, required})
+  \item
+    \textit{facebookid}: user's Facebook ID. (\texttt{string})
+  \item
+    \textit{twitterid}: user's Twitter ID. (\texttt{string})
+  \item
+    \textit{instagramid}: user's Instagram ID. (\texttt{string})
+  \end{itemize}
+\item
+  Request (application/json)
+
+\begin{verbatim}
+  {
+      "name": "Pinco Pallino",
+      "facebookid": "2228804402",
+      "twitterid": "2565227499",
+      "instagramid": "388926121"
+  }
+\end{verbatim}
+\item
+  Response 200 (application/json)
+
+\begin{verbatim}
+  {
+      "ok": "true",
+      "result": {
+          "userid": "12dfdbGRqaS34D5Hth5PaXsw",
+          "name": "Pinco Pallino",
+          "twitter": {
+              "name": "pincopallino",
+              "id": "2565227499"
+          },
+          "facebook": {
+              "name": "Pinco Pallino",
+              "id": "2228804402"
+          },
+          "instagram": {
+              "name": "pinco_pallino",
+              "id": "388926121"
+          }
+      }
+  }
+\end{verbatim}
+\end{itemize}
+
+\subsubsection{Add a social media accout to a User{[}\protect\texttt{PUT}{]}}
+
+Add a social media account to a user, specifying the ID for the social media to add. Empty parameters will not be overwritten.
+
+\begin{itemize}
+\item Parameters:
+	\begin{itemize}
+	\item \textit{userid}: user's id in our system (\texttt{string, required})
+	\item \textit{facebookid}: user's Facebook ID. (\texttt{string})
+	\item \textit{twitterid}: user's Twitter ID. (\texttt{string})
+	\item \textit{instagramid}: user's Instagram ID. (\texttt{string})
+	\end{itemize}
+\item
+  Request (\texttt{application/json})
+
+\begin{verbatim}
+  {
+      "userid": "12dfdbGRqaS34D5Hth5PaXsw",
+      "twitterid": "770389450828447745"
+  }
+\end{verbatim}
+\item
+  Response 200 (\texttt{application/json})
+
+\begin{verbatim}
+  {
+      "ok": "true",
+      "result": {
+          "userid": "12dfdbGRqaS34D5Hth5PaXsw",
+          "name": "Pinco Pallino",
+          "twitter": {
+              "name": "therealpincopallino",
+              "id": "770389450828447745"
+          },
+          "facebook": {
+              "name": "Pinco Pallino",
+              "id": "2228804402"
+          },
+          "instagram": {
+              "name": "pinco_pallino",
+              "id": "388926121"
+          }
+      }
+  }
+\end{verbatim}
+\item
+  Response 404 (\texttt{application/json})
+
+\begin{verbatim}
+  {
+      "ok": "false",
+      "error": "User ID does not exist."
+  }
+\end{verbatim}
+\end{itemize}
+
+\subsection{Fetch new user's activities {[}\protect\texttt{/downloadrequest}{]}}
+\label{sec:APIdownloadrequest}
+\subsubsection{fetch user's activities on social media not previously downloaded.{[}\protect\texttt{POST}{]}}
+
+Request a download of activities not previously fetched. This action can take a long period to be executed, due to external service limitations. For this reason, an ID of the request is returned, to check the status of the download.
+
+\begin{itemize}
+\item
+  Parameters:
+
+  \begin{itemize}
+  \item
+    \textit{userid}: user's id in our system (\texttt{string, required})
+  \item
+    \textit{count}: number of posts to download for each social media, max 200 (\texttt{integer})
+  \item
+    \textit{new}: indicates if the download should retrieve activities published before di older one fetched {[}\texttt{false}{]}, or after the newer one {[}\texttt{true}{]} (\texttt{boolean string})
+  \end{itemize}
+\item
+  Request (\texttt{application/json})
+
+\begin{verbatim}
+  {
+      "userid": "12dfdbGRqaS34D5Hth5PaXsw",
+      "count": 200,
+      "new": "false"
+  }
+\end{verbatim}
+\item
+  Response 200 (\texttt{application/json})
+
+\begin{verbatim}
+  {
+      "ok": "true",
+      "fetchid": "5adFgtu23_564aSbmogr346h0q"
+  }
+\end{verbatim}
+\end{itemize}
+
+\subsubsection{Check the status of an activity fetch request.{[}\protect\texttt{GET}{]}}
+
+Check whether a previous request was satisfied or is still waiting to be executed.
+
+\begin{itemize}
+\item
+  Parameters:
+
+  \begin{itemize}
+  \item
+    \textit{fetchid}: the ID of a fetch request previously done. (\texttt{string, required})
+  \end{itemize}
+\item
+  Response 200 (\texttt{application/json})
+
+\begin{verbatim}
+  {
+      "ok": "true",
+      "status": "completed" <!-- The status can be "in progress", or "waiting" -->
+  }
+\end{verbatim}
+\item
+  Response 404 (\texttt{application/json})
+
+\begin{verbatim}
+  {
+      "ok": "false",
+      "error": "Fetch request ID does not exist."
+  }
+\end{verbatim}
+\end{itemize}
+
+\subsection{Detect a life event into a user timeline. {[}\protect\texttt{/computation}{]}}
+\label{sec:APIcomputation}
+
+Endpoint to request and get a computation to detect a specific life event into a user's timeline.
+
+\subsubsection{Request a computation. {[}\protect\texttt{POST}{]}}
+
+Request a computation of a user timeline to discover a life event.
+
+\begin{itemize}
+\item
+  Parameters:
+
+  \begin{itemize}
+  \item
+    \textit{userid}: user's id in our system (\texttt{string, required})
+  \item
+    \textit{lifeevent}: the life event to search for (\texttt{string}, it can be "\texttt{GETTING\_MARRIED}" or "\texttt{HAVING\_CHILDREN}")
+  \end{itemize}
+\item
+  Request (\texttt{application/json})
+
+\begin{verbatim}
+  {
+      "userid": "12dfdbGRqaS34D5Hth5PaXsw",
+      "lifeevent": "GETTING_MARRIED"
+  }
+\end{verbatim}
+\item
+  Response 200 (\texttt{application/json})
+
+\begin{verbatim}
+  {
+      "ok": "true",
+      "computationid": "5add910030cb954661f458f4"
+  }
+\end{verbatim}
+\end{itemize}
+
+\subsubsection{Get the result of a computation {[}\protect\texttt{GET}{]}}
+
+Get a computation previously requested.
+
+\begin{itemize}
+\item
+  Parameters:
+
+  \begin{itemize}
+  \item
+    \textit{computationid}: the ID of the computation to get (\texttt{string, required})
+  \end{itemize}
+\item
+  Response 200 (\texttt{application/json})
+
+\begin{verbatim}
+  {
+      "ok": "true",
+      "result": {
+          "computationid": "5add910030cb954661f458f4",
+          "userid": "12dfdbGRqaS34D5Hth5PaXsw",
+          "lifeevent": "GETTING_MARRIED",
+          "detection": [
+              {
+                  "from": "2015-12-4",
+                  "to": "2016-8-15"
+              }
+          ]
+      }
+  }
+\end{verbatim}
+
+\item
+  Response 404 (\texttt{application/json})
+
+\begin{verbatim}
+  {
+      "ok": "false",
+      "error": "Computation ID does not exist."
+  }
+\end{verbatim}
+\end{itemize}
 
 \section{Global view}
+
+\begin{figure}
+\centering
+\includegraphics[width=%
+1.0\textwidth]{img/Globalview}
+\caption{A global view of the system.}
+\label{fig:globalview}
+\end{figure}
+
+Overall, the composition of the system is simple. The four logical steps previously explained in section~\ref{sec:design} are translated into four components placed in the deepest point of each request, as shown in figures~\ref{fig:globalview} and \ref{fig:interaction}. These four parts are kept as simple as possible: they are completely independent from each other, but they have a master-slave relationship with their coordinator, strongly depending on them.
+
+The first block, called Request Handler has the role to handle the API requests and to respond to those regarding the resource \texttt{User} as described in section~\ref{sec:APIuser}, while the other requests are forwarded to the next blocks. The \texttt{/user} request handling is very easy, it consists in just an addition or an edit of a user into the database of the system. If a \texttt{Download Request} is requested, the control is passed to the Download Coordinator, while in case of a \texttt{/computation} request the Computation Coordinator is called. Input and output of the Request Handler are described in detail in section~\ref{sec:APIs}.
+
+\begin{figure}
+\centering
+\includegraphics[width=%
+0.95\textwidth]{img/interaction}
+\caption{The interaction among components over time.}
+\label{fig:interaction}
+\end{figure}
+
+The two intermediate blocks business is to fulfill a download or a computation respectively. They make use of the most downstream components (the logical part) to carry out their work. In figure~\ref{fig:globalview} the Download Coordinator input/output arrow is not a classic "white" arrow but it has a grey one: it represents a queue instead of a class method call. The reason is because its component have to deal with external API with a request limit in a certain time range: in case the limit is reached, this part of the system has to suspend himself waiting for a new time range, without blocking the entire system. The queue will be the communication method between the first handler and the coordinator: the Request Handler will enqueue a tuple (User, number of posts to download from each social network) when a download will be requested, receiving immidiatly a response as shown in figure~\ref{fig:interaction}. The Download Coordinator will be a separate thread (or a separate process) that will read continuosly the queue to satisfy a request, suspending himself in case the queue is empty or when some external API limit is over. As input, the Download Coordinator takes the just mentioned tuple (User, number of posts to download from each social network), and it returns an immidiate positive message as output, indicating that the request has been loaded correctly. When a request will be satisfied, the downloaded data will be saved directly on the database of the system.
+
+The Computation coordinator has the role of coordinate the process of getting a result starting from user data already downloaded at the moment of the request. The result, of course, is the answer to the question "Has this person lived a life event?". To do that, it firstly get all the avalilable data of the user on the database of the system, which will be given to the classificator to decide whether a single post is related or not to the life event taken into consideration, and once posts are classified the decision is taken following the logic described in \ref{sec:computationperformer}. The input is a tuple (User, Life event), and the output is a Y/N answer.
+
