@@ -139,6 +139,7 @@ A possible signature for this function is the following:
 where the list of post is the user's timeline, and the returned list is made of tuples, each one indicating in which period the life event has been detected.
 
 \subsubsection{The detection algorithm}
+\label{sec:computation}
 
 In this subsection the detection algorithm, whose logic was previously explained, will be defined in pseudocode. It is assumed that all the parameters previously highlighted are defined, and that all the tree previous logical steps are already been executed. Let $n$ be the number of posts in the timeline taken into analysis, and let the data type \texttt{Post} defined as in~\ref{tab:post}.
 
@@ -548,23 +549,48 @@ Get a computation previously requested.
 \centering
 \includegraphics[width=%
 1.0\textwidth]{img/Globalview}
-\caption{A global view of the system.}
+\caption{A global view of the system with the data exchanged between the components. Grey arrows are queues of inputs, while white arrows are messagges of a class method call.}
 \label{fig:globalview}
 \end{figure}
 
-Overall, the composition of the system is simple. The four logical steps previously explained in section~\ref{sec:design} are translated into four components placed in the deepest point of each request, as shown in figures~\ref{fig:globalview} and \ref{fig:interaction}. These four parts are kept as simple as possible: they are completely independent from each other, but they have a master-slave relationship with their coordinator, strongly depending on them.
-
-The first block, called Request Handler has the role to handle the API requests and to respond to those regarding the resource \texttt{User} as described in section~\ref{sec:APIuser}, while the other requests are forwarded to the next blocks. The \texttt{/user} request handling is very easy, it consists in just an addition or an edit of a user into the database of the system. If a \texttt{Download Request} is requested, the control is passed to the Download Coordinator, while in case of a \texttt{/computation} request the Computation Coordinator is called. Input and output of the Request Handler are described in detail in section~\ref{sec:APIs}.
+Overall, the composition of the system can be divided in two big parts: the one to get the data, the other to analyze the data. The four logical steps previously explained in section~\ref{sec:design} are translated into four components placed in the deepest point of each request, as shown in figures~\ref{fig:globalview} and \ref{fig:interaction}. These four parts have different roles and behaviours: some of them are autonomous, while some others depend one from the other.
 
 \begin{figure}
 \centering
 \includegraphics[width=%
-0.95\textwidth]{img/interaction}
+0.95\textwidth]{img/Interaction}
 \caption{The interaction among components over time.}
 \label{fig:interaction}
 \end{figure}
 
-The two intermediate blocks business is to fulfill a download or a computation respectively. They make use of the most downstream components (the logical part) to carry out their work. In figure~\ref{fig:globalview} the Download Coordinator input/output arrow is not a classic "white" arrow but it has a grey one: it represents a queue instead of a class method call. The reason is because its component have to deal with external API with a request limit in a certain time range: in case the limit is reached, this part of the system has to suspend himself waiting for a new time range, without blocking the entire system. The queue will be the communication method between the first handler and the coordinator: the Request Handler will enqueue a tuple (User, number of posts to download from each social network) when a download will be requested, receiving immidiatly a response as shown in figure~\ref{fig:interaction}. The Download Coordinator will be a separate thread (or a separate process) that will read continuosly the queue to satisfy a request, suspending himself in case the queue is empty or when some external API limit is over. As input, the Download Coordinator takes the just mentioned tuple (User, number of posts to download from each social network), and it returns an immidiate positive message as output, indicating that the request has been loaded correctly. When a request will be satisfied, the downloaded data will be saved directly on the database of the system.
+The first block is the user's endpoint of the system, the only access point from the outside. It has the role to handle the APIs described in section~\ref{sec:APIs} and to call the functions in order to fulfill the requests it receives. In case of a \texttt{/user} request, it's able to respond to it independently, just accessing the internal database. Contrariwise, when a download or a computation is requested, its role is to understand the data situation for the object of the request and to launch the right component to satisfy it.
 
-The Computation coordinator has the role of coordinate the process of getting a result starting from user data already downloaded at the moment of the request. The result, of course, is the answer to the question "Has this person lived a life event?". To do that, it firstly get all the avalilable data of the user on the database of the system, which will be given to the classificator to decide whether a single post is related or not to the life event taken into consideration, and once posts are classified the decision is taken following the logic described in \ref{sec:computationperformer}. The input is a tuple (User, Life event), and the output is a Y/N answer.
+The download request will be described in detail in section~\ref{sec:downloadqueues}.
+
+The computation request is much easier, because it only works with data within the system, without any external service. Each request is fulfilled with the personal data of the user in analysis present at the time of the request. This process can be seen in the lower part of picture~\ref{fig:globalview}. User's posts are firstly classified as related or not to the life event taken into analysis, and then data is given to the computator part to detect any life event into user's timeline, as explained in section~\ref{sec:computation}. 
+
+\subsection{A queue system to download user's contents}
+\label{sec:downloadqueues}
+
+\begin{figure}
+\centering
+\includegraphics[width=%
+1\textwidth]{img/DownloadStatuses}
+\caption{The changing of status over time of a download request.}
+\label{fig:statuses}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[width=%
+1\textwidth]{img/Queues}
+\caption{The route of a download request. From the endpoint, data is divided in indipendent streams, one for each social media, and each stream is enqueued in the corresponding queue. The red, green and purple frames represents three different social network download system -- for example the red one for Facebook, the green one for Twitter and the purple one for Instagram. Once data is downloaded, it is saved into the database, and posts are given to the semantic analyzers, represented by the orange and blue frames: one for texts and one for images.}
+\label{fig:queues}
+\end{figure}
+
+The most complex request is a \texttt{/downloadrequest}, because it has to face with external APIs over HTTPS, which have free plans with request limits over a time range. Due to this issue, each part needed to fulfill this kind of requests has to be able to suspend itself without interrupt the whole system. In other words, when the function for downloading contents on a social network, or the one that deals with the external semantic analyzer reaches the limit of requests, it has to wait for another time slot stopping only itself and nothing else. For this reason data is not passed with a standard class method call, but they are inserted into a queue. There will be a queue for each module that has to interface itself with an external service, so one for each social media and one for every semantic analyzer (one for texts and one for pictures). This decision is necessary to avoid bottlenecks as much as possible: in case a social network API reaches the limit, the download in the other social networks can be carried on, and so also the following requests can start. The only thing that is necessary is to track when each part of the Download Request finishes, in order to have always a current status for every request of download: when at least a data stream of a request is taken over by the downloader or the analyzer, the status is \textit{in progress}, while if all data streams of a requests are waiting into a queue, the status is \textit{waiting}. By the time each stream passed into its specific downloader and analyzer, the status will be \textit{completed}. The status timeline can be seen in picture~\ref{fig:statuses}.
+
+For example, let's suppose to download contents made by a user who is signed up to Twitter, Facebook and Instagram. The request will be collected by the API endpoint, which will verify if the user exists into the database of the system, and in case it exists the endpoint will get from the same database, for each of the three social media, the user ID and the last post downloaded in a previous request, if there is one. After that, the tuple (user ID, starting point, number of post to download) is queued in the respective social media queue, and an immidiate response is given to the API request, to let the user know that her request has taken into consideration. At this point, each stream of data (one for each social media) will go on indipendently: it will wait its turn into the downloader queue, then data will be downloaded and saved into the database, then for each downloaded post, the tuples (post ID, text) and (post ID, photos) will be enqueued in the text semantic analyzer and in the image semantic analyzer respectively. When all these streams will have passed both downloader and analyzers, the request will be completed. This schema can be seen in picture~\ref{fig:queues}.
+
+Even though this architecture avoids as much as possible bottlenecks, a download request can take a very long time to be completed (even days), because each post from any social media has to pass through the semantic analyzers, which have a very restricted number of requests a day.
 
