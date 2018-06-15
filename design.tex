@@ -1,7 +1,7 @@
 \chapter{System design}
 \label{cha:design}
 
-\begin{figure}[H]
+\begin{figure}
 \centering
 \includegraphics[width=%
 0.95\textwidth]{img/bb}
@@ -27,7 +27,7 @@ S = \{\text{\texttt{Getting married}}, \text{ \texttt{Having children}}\}
 \section{Logical components}
 \label{sec:logicdescr}
 
-\begin{figure}
+\begin{figure}[b]
 \centering
 \includegraphics[width=%
 0.95\textwidth]{img/Solutiondesign_nutshell}
@@ -170,7 +170,127 @@ Post & & \\
 \end{tabular}
 \end{center}
 
-Now the API of the four logical component will be presented. Each one can be seen as a web interface that accepts and returns JSON objects.
+Now the API of the four logical component will be presented. Each one can be seen as a web interface that accepts and returns JSON objects. Every time that an object described just above here is used, only the parameters to uniquely identify an instance of these objects will be used. For example, only a \texttt{userID} will be used to indicate an \texttt{User} instance.
+
+\subsection{Collector API}
+The collector needs a \texttt{User} instance to which fetch her contents online, and a count that indicates how many activities to download from each social network.
+
+Input:
+\begin{itemize}
+\item \texttt{userID}, Integer.
+\item \texttt{count}, Integer.
+\end{itemize}
+
+Output:
+\begin{itemize}
+\item a list of \texttt{Post} identified by \texttt{postID} and \texttt{socialNetwork}.
+\end{itemize}
+
+Below an example of input and output.
+
+\begin{Verbatim}
+//input
+{
+	"userID": 2565227499,
+	"count": 200
+}
+
+//output
+[
+	{
+		"postID": 667069250268479488,
+		"socialNetwork": "Twitter"
+	}
+]
+\end{Verbatim}
+
+\subsection{Entity estractor API}
+The extractor needs a \texttt{Post} instance to which extract entities, and returns the same instance enriched.
+
+Input and output are the same:
+\begin{itemize}
+\item \texttt{postID}, Integer.
+\item \texttt{socialNetwork}, String.
+\end{itemize}
+
+Below an example in JSON format. Both input and output are the same.
+
+\begin{Verbatim}
+{
+	"postID": 667069250268479488,
+	"socialNetwork": "Twitter"
+}
+\end{Verbatim}
+
+\subsection{Classifier API}
+The classifier takes a life event on which the classification will be done, and a list of \texttt{Post} instances and adds the attributes \texttt{probability}, that indicates the probability with which each post is about the life event. It returns the same instances with the probability added.
+
+Input:
+\begin{itemize}
+\item \texttt{lifeEvent}, String.
+\item a list of \texttt{Post}, each one identified by \texttt{postID} and \texttt{socialNetwork}.
+\end{itemize}
+
+Output:
+\begin{itemize}
+\item a list of \texttt{Post}, each one identified by \texttt{postID} and \texttt{socialNetwork}.
+\end{itemize}
+
+Below an example of input and output.
+
+\begin{Verbatim}
+//input
+{
+	"lifeEvent": "Having children",
+	"posts": [
+		{
+			"postID": 667069250268479488,
+			"socialNetwork": "Twitter"
+		}
+	]
+}
+
+//output
+[
+	{
+		"postID": 667069250268479488,
+		"socialNetwork": "Twitter"
+	}
+]
+\end{Verbatim}
+
+\subsection{Computator API}
+The computator needs a list of \texttt{Post}, which represents the user's \textit{timeline}. Each one has to have a probability of being about a life event. It returns a list of pairs of dates, each one indicating the beginning and the end of a life event found in the timeline. The list can be empty.
+
+Input:
+\begin{itemize}
+\item a list of \texttt{Post}, each one identified by \texttt{postID} and \texttt{socialNetwork}.
+\end{itemize}
+
+Output:
+\begin{itemize}
+\item a list of pairs of dates.
+\end{itemize}
+
+An example of input and output is presented below.
+
+\begin{Verbatim}
+//input
+[
+	{
+		"postID": 667069250268479488,
+		"socialNetwork": "Twitter"
+	}
+]
+
+//output
+[
+	{
+		"from": "2018-3-8",
+		"to": "2018-5-24"
+	}
+]
+\end{Verbatim}
 
 \section{The detection algorithm}
 \label{sec:alg}
@@ -251,4 +371,16 @@ In the second part the dictionary with counters is analyzed, computing for each 
 The symbol $\perp$ represents a null type. The idea is to find some time intervals that represent a life event, each one recognized by a $start$ and an $end$. For each day in which the user published something, the relative frequence $f$ is computed (at line 7) as shown in formula~\ref{freq}. If $f$ is greater than the threshold $\alpha$ and is the very first day encountered, $start$ will point to it. For every other following day in which $f > \alpha$ and that is less than $\gamma$ days later than the current $end$, $end$ is overwritten, to point to that day. When an active day is too far from the last active day, the conditions to add a life event are checked (line 16): if at least $\beta$ active posts were previously found, the life event from $start$ to $end$ is added, and these variables are restored to detect another interval. In the end, at line 21, is verified whether there is an interval left open, and in this case, if there are enough posts, a last life event is added.
 
 The complexity of both algorithm~\ref{freq_computing} and~\ref{decision} is $\Theta(n)$ in time, because each post is analyzed only once, in both functions. In case posts are not sorted by date, the computational cost will be dominated by the sorting procedure, becoming $\Theta(n \log n)$.
+
+\section{Exposed APIs}
+\label{sec:APIs}
+
+In this section the APIs offered by the system will be defined. These interfaces are RESTful APIs, which expose the main resources available in the system: \texttt{User}, \texttt{Download Request} and \texttt{Computation}. For each resource, the possibilities to retrieve and create new istances are offered, and for the user resource is also possible to edit an istance. The structure of the \texttt{User} resource is described in section~\ref{sec:apis}. A \texttt{Download Request} is meant to download user's contents from social media, and it's exectued asynchronusly, as explained in section~\ref{sec:downloadqueues}. Finally, a \texttt{Computation} is an analysis on a user's timeline with a given life event, as described in section~\ref{sec:alg}.
+
+Each response has a field \texttt{"ok"} that indicates whether everything went well. In case an error occours, the field \texttt{"error"} will give a human readable explaination of the error, while the HTTP status code will indicate what kind of problem occoured (for example a 404 error in case the user requires a resources that doesn't exist).
+
+The complete API specification can be found on Apiary\footnote{\url{http://apiary.io/}}:
+\begin{center}
+\url{lifeevents.docs.apiary.io}
+\end{center}
 

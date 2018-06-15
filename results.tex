@@ -17,21 +17,53 @@ Overall, the whole system can be divided in two big parts: the one to get the da
 \begin{figure}
 \centering
 \includegraphics[width=%
-0.95\textwidth]{img/Interaction}
+1\textwidth]{img/Interaction}
 \caption{The interaction among components over time.}
 \label{fig:interaction}
 \end{figure}
 
-\dots
+The request handler is the user's endpoint of the system, the only access point from the outside. This component allows managing the addition and modification of the users to be analyzed, and starts a content download or a computation of the timeline.
+
+The download request will be described in detail in section~\ref{sec:downloadqueues}.
+
+The computation request is much easier, because it only works with data within the system, without any external service. Each request is fulfilled with the personal data of the user in analysis present at the moment of the request. This process can be seen in the lower part of picture~\ref{fig:globalview}. User's posts are firstly classified as related or not to the life event taken into analysis, and then data is given to the computator part to detect the life events into user's timeline, as explained in section~\ref{sec:computation}. 
+
+\subsection{A queue system to download user's contents}
+\label{sec:downloadqueues}
+
+\begin{figure}
+\centering
+\includegraphics[width=%
+1\textwidth]{img/DownloadStatuses}
+\caption{The changing of status over time of a download request.}
+\label{fig:statuses}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[width=%
+1\textwidth]{img/Queues}
+\caption{The route of a download request. From the endpoint, data is divided in indipendent streams, one for each social media, and each stream is enqueued in the corresponding queue. The red, green and purple frames represents three different social network download system -- for example the red one for Facebook, the green one for Twitter and the purple one for Instagram. Once data is downloaded, it is saved into the database, and posts are given to the semantic analyzers, represented by the orange and blue frames: one for texts and one for images.}
+\label{fig:queues}
+\end{figure}
+
+The most complex request is a \texttt{/downloadrequest}, because it has to face itself with external APIs over HTTPS, which have free plans with some request limits over a time range. Due to this issue, each part needed to fulfill this kind of requests has to be able to suspend itself without interrupt the whole system in case request number runs out. In other words, when the function for downloading contents on a social network, or the one that deals with the external semantic analyzer reaches the limit of requests, it has to wait for another time slot stopping only itself and nothing else. For this reason data is not passed with a standard class method call, but it's inserted into a queue. There will be a queue for each module that has to interface itself with an external service, so one for each social media and one for every semantic analyzer (one for texts and one for pictures). This decision is necessary to avoid bottlenecks as much as possible: in case a social network API reaches the limit, the downloads in the other social networks can be carried on, and so also the following requests can start. The only thing that is necessary is to track when each part of the Download Request finishes, in order to have always a current status for every request of download: when at least a data stream of a request is taken over by some downloader or analyzer, the status is \textit{in progress}, while if all data streams of a requests are waiting into a queue, the status is \textit{waiting}. By the time each stream passed into its specific downloader and analyzer successfully, the status will be \textit{completed}. The status timeline can be seen in picture~\ref{fig:statuses}.
+
+For example, let's suppose to download contents made by a user who is signed up to Twitter, Facebook and Instagram. The request will be collected by the API endpoint, which will verify if the user exists into the database of the system, and in case it exists the endpoint will get from the same database, for each of the three social media, the user ID on that social network and the last post downloaded in a previous request, if there is one. After that, the tuple (user ID, starting point, number of post to download) is queued in the respective social media queue, and an immidiate response is given to the API request, to let the user know that her request has taken into consideration. At this point, three stream of data (one for each social media) are created, and they will go on indipendently: each of them will wait its turn into the downloader queue, then data will be downloaded and saved into the database. At this point other two streams for each downloaded post are created, one for images and one for texts: the tuples (post ID, text) and (post ID, photos) will be enqueued in the text semantic analyzer and in the image semantic analyzer respectively. When all these streams will have passed both downloader and analyzers, the request will be completed. This schema can be seen in picture~\ref{fig:queues}.
+
+Even though this architecture avoids as much as possible bottlenecks, a download request can take a very long time to be completed (even days), because each post from any social media has to pass through the semantic analyzers, which have a very restricted number of requests a day.
 
 \section{Implementation choices}
 Due to the recent Cambridge Analytica scandal that involved Facebook, and with the consequent policy updates made by the social network, develop an application that works with Facebook products (Facebook itself and Instagram, for instance) that uses user's contents has become difficult. To do that, Facebook has to release a manual authorization after a demo video has been created to show what the application does. Even if a beta development had been used, it would have been hard to find enough users available to share their data for the development of this system. For these reasons it was decided to base the application on Twitter.
 
 Another issue is related with the external semantic analyzers: only free account has been used, which implies a very strict number of requests per day (1000). This means that currently a computation can take a very long time to be executed, even days, beacuse each post has to be analyzed by this external services. Furthermore, image analyzers have free plan with only 1000 request a month, so it was decided to use only texts of posts, and to ignore images. All the obtained result, therefore, are only related with texts of tweets. On the other hand, some tests with images were executed, showing that the use of images would give better results: in fact, several posts of life events are composed only by images, so at the current situation they can't be classified correctly.
 
+About implementation, the system is developed in Python, using some standard libraries for machine learning and mathematical purposes: the classifiers  
+are those available in the \texttt{scikit-learn}\footnote{\url{http://scikit-learn.org/}} library \cite{scikit-learn}, while for numerical arrays, matrices and other mathematical functions the \texttt{NumPy}\footnote{\url{http://www.numpy.org/}} library \cite{oliphant2006guide} is chosen. Data is stored and organized using a \texttt{MongoDB} database\footnote{\url{www.mongodb.com}}. Last but not least, the external semantic analyzer for texts is called \texttt{Dandelion}\footnote{\url{dandelion.eu}} made by SpazioDati S.r.l.\footnote{\url{spaziodati.eu}}. Some test with images were also performed, using the \texttt{Cloud Vision API} of Google Cloud\footnote{\url{cloud.google.com/vision/}}.
+
 \section{Feature extraction}
 \label{sec:featurextraction}
-In this section the feature extraction technique will be presented. It is thought to work with posts from various social networks, whose structure can be seen in section XX. In general, each post has a text and a series of images that are used for the classification. According to section~\ref{sec:dataset}, Wikipedia entities are used as features, for two reasons:
+In this section the feature extraction technique will be presented. It is thought to work with posts from various social networks, whose structure can be seen in section~\ref{sec:apis}. In general, each post has a text and a series of images that are used for the classification. According to section~\ref{sec:dataset}, Wikipedia entities are used as features, for two reasons:
 \begin{enumerate}
 \item In this way it's possible to work with as many languages as is wanted, using only one for training. In fact, letting $ L $ be the language of the samples in the training set, it's enough to map all the entities found in posts written in a language $ L^{'} \ne L $ to the corrisponding entity in the $ L $ version of Wikipedia. All the most common entities for life events exist in many version of the online encyclopedia.
 \item With this method is possible to consider texts and images in the same way, seeing them as \textit{entity containers} without differentiating them.
@@ -44,7 +76,7 @@ Of course, the features used for weddings is different than the one for births, 
 \section{Construction and performance of the classifier}
 In this section all the techniques used to create a classifier as good as possible will be explained.
 
- According to the literature, a naive bayes classifier and a decision tree were chosen as classifiers, but due to the better performance of the first one, the second one was initially discarded. In particular, the classifier was a Multinomial Naive Bayes\footnote{\url{http://scikit-learn.org/stable/modules/naive_bayes.html#multinomial-naive-bayes}} available in the \texttt{scikit-learn}\footnote{\url{http://scikit-learn.org/}} library \cite{scikit-learn}.
+ According to the literature, a naive bayes classifier and a decision tree were chosen as classifiers, but due to the better performance of the first one, the second one was initially discarded. In particular, the classifier was a Multinomial Naive Bayes\footnote{\url{http://scikit-learn.org/stable/modules/naive_bayes.html#multinomial-naive-bayes}}.
 
 The very first feature extraction technique was inspired by the \texttt{tf-idf} weight function\footnote{\url{https://it.wikipedia.org/wiki/Tf-idf}}, which is used to undestrand the importance of a word into a series of documents. The idea was to select a small sample of key entities analyzing some web pages focused on the life event taken into consideration, such as a wedding planner homepage or a pregnancy blog. These $k$ top entities were used as features of tweets, and a matrix $X$ was created in the same way explained in section~\ref{sec:featurextraction}, but with $m = k$. However, this methodology performed worse than a random classifier, with both precision and recall scores lower than $0.5$, with $k = 3, 4, 5, 10, 100$.
 
@@ -125,3 +157,6 @@ Sample & Precision & Recall & F1 Score & Support \\
 \caption{The performance of the decision tree with a very unbalanced dataset. On this same test set the previous classifier, the naive bayes, showed both precision and recall scores under 0.1.}
 \end{table}
 
+\section{Detection evaluation}
+\label{sec:detectioneva}
+\dots
