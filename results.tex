@@ -1,6 +1,6 @@
 \chapter{Implementation and evaluation}
 \label{cha:results}
-In this chapter some details about the development of the system and the results obtained in the various tests carried out will be illustrated. Firstly, the performance of the classifier will be explained, and secondly \dots
+This chapter will present how the system was developed, giving a panoramic view of the interaction between components and a detailed focus on the solution chosen to deal with external services with a limited number of requests in a certain time range. After that, the development techniques for the classifier will be presented, along with the performance evaluation of the latter one, and finally an evaluation about the detection process will be provided.
 
 \section{Component interactions and communications}
 \label{sec:view}
@@ -42,7 +42,7 @@ The computation request is much easier, because it only works with data within t
 \begin{figure}
 \centering
 \includegraphics[width=%
-1\textwidth]{img/Queues}
+0.85\textwidth]{img/Queues}
 \caption{The route of a download request. From the endpoint, data is divided in independent streams, one for each social media, and each stream is enqueued in the corresponding queue. The red, green and purple frames represents three different social network download system -- for example the red one for Facebook, the green one for Twitter and the purple one for Instagram. Once data is downloaded, it is saved into the database, and posts are given to the semantic analyzers, represented by the orange and blue frames: one for texts and one for images.}
 \label{fig:queues}
 \end{figure}
