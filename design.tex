@@ -11,7 +11,7 @@
 
 In this chapter the design process will be presented, starting from the requirements and the description of the working logic. After that, a more schematic view will be provided, explaining how the system is designed and how the components work and communicate each other. At the end, the algorithms used to compute the output will be presented and explained.
 
-Seen as a blackbox (in figure~\ref{fig:bb}), the system takes two inputs: all the user's activities in the social networks she is registered in, and a life event to search for, and it returns as output a yes/no answer to the question "\textit{has this user lived this life event?}", with a time reference estimation attached.
+Seen as a black-box (in figure~\ref{fig:bb}), the system takes two inputs: all the user's activities in the social networks she is registered in, and a life event to search for, and it returns as output a yes/no answer to the question "\textit{has this user lived this life event?}", with a time reference estimation attached.
 
 \section{Requirements}
 
@@ -42,34 +42,34 @@ This section describes the specifications of the logical functionalities of the 
 \item Classify each content.
 \item Decide whether the user has lived the life event relying on his/her contents.
 \end{enumerate}
-Each step relies on what the previous steps do: for example, to execute the third one, the first and the second ones must have already been executed at least once. The number of execution required to perform the entire computation from scratch will probably not be the same for each part: in fact, the fist two steps are coupled together, and they need to be performed a consisten number of times before fetching an entire user's timeline. Once the whole timeline is downloaded, just a single call for the third and the fourth steps will be needed to complete the computation. In the following subsections the logic of the proposed methodology will be illustrated, providing a textual description of what each component has to do, of the input, the output and the parameters. 
+Each step relies on what the previous steps do: for example, to execute the third one, the first and the second ones must have already been executed at least once. The number of execution required to perform the entire computation from scratch will probably not be the same for each part: in fact, the first two steps are coupled together, and they need to be performed a consistent number of times before fetching an entire user's timeline. Once the whole timeline is downloaded, just a single call for the third and the fourth steps will be needed to complete the computation. In the following subsections the logic of the proposed methodology will be illustrated, providing a textual description of what each component has to do, of the input, the output and the parameters. 
 
 \subsection{Collect activities}
 This part has the goal to fetch user's contents on social networks, using the services for developers offered by the official APIs of each social network. The data of interest are some pieces of user's information, such as name, birthday, number of friends/followers, subscription date, her location and language, and of course all her contents: all the posts she wrote, with attachments, external links and the publication date, with also some other useful metadata, such us the number of likes, replies and shares. Some social media, like Twitter, offer a free API plan with some restrictions over time: for example to retrieve user's tweets is possible to make 1500 requests every 15 minutes. In case the limit is reached, this part should suspend itself waiting for a new time slot: for this reason is suggested to run this function in a dedicated thread or process.
 
 As input this functionality needs a series of IDs that identify the user among all the social networks she uses, and for each social platform is necessary to know at which point the data of a given user has been downloaded. In fact, due to the huge amount of data, social network services return a small quantity of data for each request, therefore, after the first request, the point from which start to download data must be specified.
 
-As output, a list with \textit{new} user's post is expected. In case it's the first time that the data of a user is downloaded, a list of user's information is expected too, otherwise $ n $ new posts are enough. The term \textit{new} means that all the fetched post were not previously downloaded by the system, turning out to be new for it, even if they can be dated far in the past. In other words, a new post for our system may not be new for the social network, but is simply a post that were not included in any of the previous download for that given user. Last but not least, the point the data has been fetched for the user must be updated.
+As output, a list with \emph{new} user's post is expected. In case it's the first time that the data of a user is downloaded, a list of user's information is expected too, otherwise $ n $ new posts are enough. The term \emph{new} means that all the fetched post were not previously downloaded by the system, turning out to be new for it, even if they can be dated far in the past. In other words, a new post for our system may not be new for the social network, but is simply a post that were not included in any of the previous download for that given user. Last but not least, the point the data has been fetched for the user must be updated.
 
-The number $ n $ of post to download could be given as parameter. It would be better if the number is \textit{small}, not to overload the system. For example, Twitter allows to fetch up to $ 200 $ tweets a request. The default parameters should be setted equal to the maximum limit imposed by the API.
+The number $ n $ of post to download could be given as parameter. It would be better if the number is \emph{small}, not to overload the system. For example, Twitter allows to fetch up to $ 200 $ tweets a request. The default parameters should be setted equal to the maximum limit imposed by the API.
 
 \subsection{Entities extraction}
-This part has the task to add semantic information to the data that was previously downloaded from social networks. What is obtained from the previous part are only raw texts and images, the goal is now to understand what the user has talked about into her posts. To do that, some external semantic analyzer will be used: this kind of service extracts entities, topics and sentiment starting from a text or a image. An \textit{entity} is a person, an object or a concept that has an article on Wikipedia; a \textit{topic} is a Wikipedia category to which an entity belongs to. For example, the phrase "I'm studying computer science at the university" has two entities - \texttt{Computer science} and \texttt{University} - and the following list of topics: \texttt{Electrical engineering, Electronic engineering, Computer engineering, Computer science, Educational stages, Higher education, Types of university or col\-le\-ge, Universities and colleges, Youth}. These new metadata added to the information obtained previously will be useful in further steps to understand whether a post is about a life event or not. This functionality has also the delicate task to deal with the request rate limits of the external analyzers: in fact many of these API have strict limitations for free plans, allowing only a small amount of requests in a certain time window. In case the limit runs out, this part of the system has to suspend himself waiting for another time window to send new requests, keeping in memory all the computation requested in the meantime.
+This part has the task to add semantic information to the data that was previously downloaded from social networks. What is obtained from the previous part are only raw texts and images, the goal is now to understand what the user has talked about into her posts. To do that, some external semantic analyzer will be used: this kind of service extracts entities, topics and sentiment starting from a text or a image. An \emph{entity} is a person, an object or a concept that has an article on Wikipedia; a \emph{topic} is a Wikipedia category to which an entity belongs to. For example, the phrase "I'm studying computer science at the university" has two entities - \texttt{Computer science} and \texttt{University} - and the following list of topics: \texttt{Electrical engineering, Electronic engineering, Computer engineering, Computer science, Educational stages, Higher education, Types of university or col\-le\-ge, Universities and colleges, Youth}. These new metadata added to the information obtained previously will be useful in further steps to understand whether a post is about a life event or not. This functionality has also the delicate task to deal with the request rate limits of the external analyzers: in fact many of these API have strict limitations for free plans, allowing only a small amount of requests in a certain time window. In case the limit runs out, this part of the system has to suspend himself waiting for another time window to send new requests, keeping in memory all the computation requested in the meantime.
 
 A post, composed by text, images or external links is expected as input. Furthermore, a list of posts could be accepted as input, but in this case the number of remaining requests must be handled carefully.
 
 As output, a list of entities, topics and sentiment scores is returned for each post analyzed. The sentiment score is made by a floating point number, that ranges from a minimum value - such as $ -1.0 $ - to a maximum value - like $ 1.0 $. Instead, entities and topics can be represented by a string or an \texttt{URI}, for example a \texttt{Wikipedia URI}.
 
-By default, everything that is returned by the external analyzer could be given as output, together with a confidence for each entity found inside texts or photos. In addition, this part of the system should provide the possibility to consider only the \textit{top entities} (e.g. the most meaningful, or those with the highest confidence), and also the possibility to set a minimum value of confidence under which an entity is discarded.
+By default, everything that is returned by the external analyzer could be given as output, together with a confidence for each entity found inside texts or photos. In addition, this part of the system should provide the possibility to consider only the \emph{top entities} (e.g. the most meaningful, or those with the highest confidence), and also the possibility to set a minimum value of confidence under which an entity is discarded.
 
 \subsection{Classifier}
 This part has the fundamental purpose to decide whether a post is about or not to a certain life event. Its task is to extract some features from the posts previously downloaded, and apply some machine learning algorithm to take this decision. As explained in section~\ref{sec:dataset}, the standard approach to classify textual contents in multiple languages is to have a great number of examples for each tongue; in this thesis a different approach is tried, using entities and topics instead of single words, for two reasons. In this way is enough to train the classifier with a single dataset in a given language $ L $ - english - and for all the contents that are not in the $ L $ language is just necessary to map all the entities in the respectives of $L$. In addition to that, with this technique is possible to consider both photos and texts as the same thing: just entity containers, it's not necessary to treat them separately. All the keys entities for a life event exist in several languages, so this mapping procedure should easily be successful: for example, the entity \texttt{Infant} for the birth of a child event exists in 82 languages. English is chosen as main language because the english version of Wikipedia has a number of articles at least 5 times bigger than any other language.
 
 At this point the current situation is, for each user taken into analysis, a list of posts - made by texts, attachments and images - enriched with semantic entities, topics and sentiment score. The input will be a tuple (or a list of tuples) made by a post, composed as just described, and a life event of interest, for which we want to predict if the post is about it. A life event could be represented by an unique string, e.g. "\texttt{GETTING\char`_MARRIED}" for a wedding, or alternatively by an integer ID.
 
-As output, the probabiliy with which the post (or the list of posts) concerns with the life event is expected.
+As output, the probability with which the post (or the list of posts) concerns with the life event is expected.
 
-The feature extraction method can be decided a priori, as described earlier, or it could be setted as parameter: in this last case is possible to use only \textit{text features} - the words that compose the text of each post - or use only \textit{entity features} - the semantic entities for reasoning on the meaning of the post, or use them both together. This choice should be made paying attention to the available datasets to train the classifier: in fact, if \textit{text features} are chosen, at least a different dataset for each language supported has to be provided as explained in section~\ref{sec:dataset}.
+The feature extraction method can be decided a priori, as described earlier, or it could be setted as parameter: in this last case is possible to use only \emph{text features} - the words that compose the text of each post - or use only \emph{entity features} - the semantic entities for reasoning on the meaning of the post, or use them both together. This choice should be made paying attention to the available datasets to train the classifier: in fact, if \emph{text features} are chosen, at least a different dataset for each language supported has to be provided as explained in section~\ref{sec:dataset}.
 
 \subsection{Computation performer}
 \label{sec:computationperformer}
@@ -78,7 +78,7 @@ The feature extraction method can be decided a priori, as described earlier, or 
 \centering
 \includegraphics[width=%
 0.8\textwidth]{img/bale}
-\caption{The success collected by this account is high when it talks about a life event (the two red vertical line represent the pubblication of two posts related to the birth of a child).}
+\caption{The success collected by this account is high when it talks about a life event (the two red vertical line represent the publication of two posts related to the birth of a child).}
 \label{fig:bale}
 \end{figure}
 
@@ -99,7 +99,7 @@ For each day $d$ the user has been active on social media (those days in which t
 f(d) = \frac{r(d)}{all(d)}
 \label{freq}
 \end{gather}
-where $r(d)$ is the number of posts related to the life event written the day $d$, and $all(d)$ is the count of all posts published the day $d$. Of course, the timeline is already targeted with the life event taken into consideration. In other words, the life event to monitor is chosen in the previous steps: at this point the timeline is labelled only for a single life event. Once the frequency has been computed for every day, it can be plotted over time, and at the moment $f$ passes a given threshold $\alpha$, the life event is begun. When a minimum number of days $\beta$ in which $f(t) > \alpha$ are found, the life event can be considered as detected. By the time in $\gamma$ days there are no \textit{active days}, the life event can be seen as over.
+where $r(d)$ is the number of posts related to the life event written the day $d$, and $all(d)$ is the count of all posts published the day $d$. Of course, the timeline is already targeted with the life event taken into consideration. In other words, the life event to monitor is chosen in the previous steps: at this point the timeline is labelled only for a single life event. Once the frequency has been computed for every day, it can be plotted over time, and at the moment $f$ passes a given threshold $\alpha$, the life event is begun. When a minimum number of days $\beta$ in which $f(t) > \alpha$ are found, the life event can be considered as detected. By the time in $\gamma$ days there are no \emph{active days}, the life event can be seen as over.
 
 As input is expected a list of boolean label with a timestamp, that represents the user's timeline in function to a life event.
 
@@ -109,15 +109,15 @@ There are several parameter for this phase:
 \begin{itemize}
 \item a pair of probability $p_1$ and $p_2$ to consider a post directly related with the life event, or to check post success to take that decision. By default, $p_1 = 0.6$ and $p_2 = 0.4$.
 \item the threshold $\alpha$ for the frequency $f$ over which the life event is considered as started.
-\item $\beta$, the minimum number of \textit{active posts} to consider a life event detected. This parameter serves to correct any errors in post classification. In fact, is possible that a text or an image is misclassified: using this parameter is possible to avoid single and isolated errors.
-\item $\gamma$, the maximum time between two \textit{active days} to consider them as related to the same life event. This parameter has the role to put an end to a detection, and consequently to split two consecutive life events.
+\item $\beta$, the minimum number of \emph{active posts} to consider a life event detected. This parameter serves to correct any errors in post classification. In fact, is possible that a text or an image is misclassified: using this parameter is possible to avoid single and isolated errors.
+\item $\gamma$, the maximum time between two \emph{active days} to consider them as related to the same life event. This parameter has the role to put an end to a detection, and consequently to split two consecutive life events.
 \end{itemize}
 
 \section{Interfaces of the components}
 \label{sec:apis}
 In this section the API of each component will be presented. Internal APIs are very important to allow system scalability and to facilitate any future changes to the logic or to the functionalities. Firstly, some data types used inside the system will be formalized, and secondly, the API will be listed.
 
-The first data type represents a \textit{user}, which is a subject of a computation. The object \texttt{User} is so composed:
+The first data type represents a \emph{user}, which is a subject of a computation. The object \texttt{User} is so composed:
 
 \begin{center}
 \label{tab:user}
@@ -148,7 +148,7 @@ SocialNetworkUser & & \\
 \end{tabular}
 \end{center}
 
-The fields \textit{from} and \textit{to} need to undestand where to begin a download request. Finally, the concept of \textit{post} is now formalized in an object call \texttt{Post}: it includes all the useful data for this purpose, such as date of creation, number of likes and shares, sentiment score, entity and topic sets and the probability to be about a life event. At the beginning of the analysis many of this attributes will be empty, and each logical step will add a piece of information. Each post is uniquely identified by the couple (ID, social networks).
+The fields \emph{from} and \emph{to} need to understand where to begin a download request. Finally, the concept of \emph{post} is now formalized in an object call \texttt{Post}: it includes all the useful data for this purpose, such as date of creation, number of likes and shares, sentiment score, entity and topic sets and the probability to be about a life event. At the beginning of the analysis many of this attributes will be empty, and each logical step will add a piece of information. Each post is uniquely identified by the couple (ID, social networks).
 
 \begin{center}
 \label{tab:post}
@@ -204,7 +204,7 @@ Below an example of input and output.
 ]
 \end{Verbatim}
 
-\subsection{Entity estractor API}
+\subsection{Entity extraction API}
 The extractor needs a \texttt{Post} instance to which extract entities, and returns the same instance enriched.
 
 Input and output are the same:
@@ -260,7 +260,7 @@ Below an example of input and output.
 \end{Verbatim}
 
 \subsection{Computator API}
-The computator needs a list of \texttt{Post}, which represents the user's \textit{timeline}. Each one has to have a probability of being about a life event. It returns a list of pairs of dates, each one indicating the beginning and the end of a life event found in the timeline. The list can be empty.
+The computator needs a list of \texttt{Post}, which represents the user's \emph{timeline}. Each one has to have a probability of being about a life event. It returns a list of pairs of dates, each one indicating the beginning and the end of a life event found in the timeline. The list can be empty.
 
 Input:
 \begin{itemize}
@@ -297,7 +297,7 @@ An example of input and output is presented below.
 
 In this subsection the detection algorithm, whose logic was previously explained in section~\ref{sec:computationperformer}, will be defined in pseudocode. It is assumed that all the parameters previously highlighted are defined, and that all the tree previous logical steps are already been executed. Let $n$ be the number of posts in the timeline taken into analysis, and let the data type \texttt{Post} defined as in~\ref{tab:post}.
 
-The algorithm is composed by two main parts. In the first part, the goal is to compute the average numer of likes and shares recieved by the user among her posts, and the average sentiment score. After that, all the posts are grouped by date of publication, creating a dictionary with keys $k$ the days in which the user has published something, and values a tuple (posts related with the life event on day $k$, all posts on day $k$). This is explain in the algorithm~\ref{freq_computing}.
+The algorithm is composed by two main parts. In the first part, the goal is to compute the average number of likes and shares received by the user among her posts, and the average sentiment score. After that, all the posts are grouped by date of publication, creating a dictionary with keys $k$ the days in which the user has published something, and values a tuple (posts related with the life event on day $k$, all posts on day $k$). This is explain in the algorithm~\ref{freq_computing}.
 
 \begin{algorithm}
 \caption{Compute the relative frequency of activities related to the life event.}
@@ -327,7 +327,7 @@ The algorithm is composed by two main parts. In the first part, the goal is to c
 \end{algorithmic}
 \end{algorithm}
 
-For each day $count$ and $total$ are computed, which represent the number of posts related to the life event and the total number of post on that day respectively. At line 10 the decision to trust the classification directly is taken. In case it's not trusted, the condition at line 12 checks whether the probabiliy is greater or equal than $p_2$ and if number of likes, shares and sentiment score are all over the average of the user, as explained in formula~\ref{avgs}. The last condition at line 14 is to understand whether a post is the last one for a day: this happens when the current post is the last one in the collection, or when the next one has a different date of creation.
+For each day $count$ and $total$ are computed, which represent the number of posts related to the life event and the total number of post on that day respectively. At line 10 the decision to trust the classification directly is taken. In case it's not trusted, the condition at line 12 checks whether the probability is greater or equal than $p_2$ and if number of likes, shares and sentiment score are all over the average of the user, as explained in formula~\ref{avgs}. The last condition at line 14 is to understand whether a post is the last one for a day: this happens when the current post is the last one in the collection, or when the next one has a different date of creation.
 
 In the second part the dictionary with counters is analyzed, computing for each day the frequency of activeness as in formula~\ref{freq} and analyzing it to understand if there are significant changes on it. This is explained in the algorithm~\ref{decision}.
 
@@ -368,16 +368,16 @@ In the second part the dictionary with counters is analyzed, computing for each 
 \end{algorithmic}
 \end{algorithm}
 
-The symbol $\perp$ represents a null type. The idea is to find some time intervals that represent a life event, each one recognized by a $start$ and an $end$. For each day in which the user published something, the relative frequence $f$ is computed (at line 7) as shown in formula~\ref{freq}. If $f$ is greater than the threshold $\alpha$ and is the very first day encountered, $start$ will point to it. For every other following day in which $f > \alpha$ and that is less than $\gamma$ days later than the current $end$, $end$ is overwritten, to point to that day. When an active day is too far from the last active day, the conditions to add a life event are checked (line 16): if at least $\beta$ active posts were previously found, the life event from $start$ to $end$ is added, and these variables are restored to detect another interval. In the end, at line 21, is verified whether there is an interval left open, and in this case, if there are enough posts, a last life event is added.
+The symbol $\perp$ represents a null type. The idea is to find some time intervals that represent a life event, each one recognized by a $start$ and an $end$. For each day in which the user published something, the relative frequency $f$ is computed (at line 7) as shown in formula~\ref{freq}. If $f$ is greater than the threshold $\alpha$ and is the very first day encountered, $start$ will point to it. For every other following day in which $f > \alpha$ and that is less than $\gamma$ days later than the current $end$, $end$ is overwritten, to point to that day. When an active day is too far from the last active day, the conditions to add a life event are checked (line 16): if at least $\beta$ active posts were previously found, the life event from $start$ to $end$ is added, and these variables are restored to detect another interval. In the end, at line 21, is verified whether there is an interval left open, and in this case, if there are enough posts, a last life event is added.
 
 The complexity of both algorithm~\ref{freq_computing} and~\ref{decision} is $\Theta(n)$ in time, because each post is analyzed only once, in both functions. In case posts are not sorted by date, the computational cost will be dominated by the sorting procedure, becoming $\Theta(n \log n)$.
 
 \section{Exposed APIs}
 \label{sec:APIs}
 
-In this section the APIs offered by the system will be defined. These interfaces are RESTful APIs, which expose the main resources available in the system: \texttt{User}, \texttt{Download Request} and \texttt{Computation}. For each resource, the possibilities to retrieve and create new istances are offered, and for the user resource is also possible to edit an istance. The structure of the \texttt{User} resource is described in section~\ref{sec:apis}. A \texttt{Download Request} is meant to download user's contents from social media, and it's exectued asynchronusly, as explained in section~\ref{sec:downloadqueues}. Finally, a \texttt{Computation} is an analysis on a user's timeline with a given life event, as described in section~\ref{sec:alg}.
+In this section the APIs offered by the system will be defined. These interfaces are RESTful APIs, which expose the main resources available in the system: \texttt{User}, \texttt{Download Request} and \texttt{Computation}. For each resource, the possibilities to retrieve and create new instances are offered, and for the user resource is also possible to edit an instance. The structure of the \texttt{User} resource is described in section~\ref{sec:apis}. A \texttt{Download Request} is meant to download user's contents from social media, and it's executed asynchronously, as explained in section~\ref{sec:downloadqueues}. Finally, a \texttt{Computation} is an analysis on a user's timeline with a given life event, as described in section~\ref{sec:alg}.
 
-Each response has a field \texttt{"ok"} that indicates whether everything went well. In case an error occours, the field \texttt{"error"} will give a human readable explaination of the error, while the HTTP status code will indicate what kind of problem occoured (for example a 404 error in case the user requires a resources that doesn't exist).
+Each response has a field \texttt{"ok"} that indicates whether everything went well. In case an error occurs, the field \texttt{"error"} will give a human readable explanation of the error, while the HTTP status code will indicate what kind of problem occurred (for example a 404 error in case the user requires a resources that doesn't exist).
 
 The complete API specification can be found on Apiary\footnote{\url{apiary.io}}:
 \begin{center}
