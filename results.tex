@@ -160,5 +160,43 @@ Sample & Precision & Recall & F1 Score & Support \\
 
 \section{Detection evaluation}
 \label{sec:detectioneva}
-\dots
+
+\noindent
+\renewcommand\arraystretch{1.5}
+\setlength\tabcolsep{0pt}
+
+\begin{table}
+\centering
+\subtable[Getting married\label{tab:weddingconf}]{
+\begin{tabular}{c >{\bfseries}r @{\hspace{0.7em}}c @{\hspace{0.4em}}c @{\hspace{0.7em}}l}
+  \multirow{10}{*}{\parbox{1.1cm}{\bfseries\raggedleft Actual\\ value}} & 
+    & \multicolumn{2}{c}{\bfseries Prediction outcome} & \\
+  & & \bfseries True & \bfseries False & \bfseries Total \\
+  & True & \MyBox{4}{} & \MyBox{0}{} & 4 \\[2.4em]
+  & False & \MyBox{4}{} & \MyBox{15}{} & 19 \\
+  & Total & 8 & 15 &
+\end{tabular}
+}
+\quad
+\subtable[Having children\label{tab:childrenconf}]{
+\begin{tabular}{c >{\bfseries}r @{\hspace{0.7em}}c @{\hspace{0.4em}}c @{\hspace{0.7em}}l}
+  \multirow{10}{*}{\parbox{1.1cm}{\bfseries\raggedleft Actual\\ value}} & 
+    & \multicolumn{2}{c}{\bfseries Prediction outcome} & \\
+  & & \bfseries True & \bfseries False & \bfseries Total \\
+  & True & \MyBox{10}{} & \MyBox{0}{} & 10 \\[2.4em]
+  & False & \MyBox{9}{} & \MyBox{3}{} & 12 \\
+  & Total & 19 & 3 &
+\end{tabular}
+}
+\caption{Confusion matrices}
+\end{table}
+
+\indent
+
+Volgio dgbd.
+
+edwefwf.
+
+
+
 

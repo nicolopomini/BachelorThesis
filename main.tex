@@ -22,12 +22,16 @@
 \usepackage{amssymb}
 \usepackage{url}
 \usepackage{subfigure}
+\usepackage{multirow}
+\usepackage{array}
 \usepackage{rotating}
 \usepackage{algorithm}
 \usepackage[noend]{algpseudocode}
 \usepackage{fancyvrb}
 \usepackage[paperheight=29.7cm,paperwidth=21cm,outer=1.5cm,inner=2.5cm,top=2cm,bottom=2cm]{geometry} % per definizione layout
 \usepackage{titlesec} % per formato custom dei titoli dei capitoli
+\usepackage{tikz}
+\usetikzlibrary{positioning}
 
 %%%%%%%%%%%%%%
 % supporto lettere accentate
@@ -39,6 +43,14 @@
 \singlespacing
 
 \usepackage[english]{babel}
+
+\newcommand\MyBox[2]{
+  \fbox{\lower0.75cm
+    \vbox to 1.7cm{\vfil
+      \hbox to 1.7cm{\hfil\parbox{1.4cm}{\centerline{#1}}\hfil}
+      \vfil}%
+  }%
+}
 
 \begin{document}
 
