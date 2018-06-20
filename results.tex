@@ -160,11 +160,9 @@ Sample & Precision & Recall & F1 Score & Support \\
 
 \section{Detection evaluation}
 \label{sec:detectioneva}
-
 \noindent
 \renewcommand\arraystretch{1.5}
 \setlength\tabcolsep{0pt}
-
 \begin{table}
 \centering
 \subtable[Getting married\label{tab:weddingconf}]{
@@ -188,15 +186,28 @@ Sample & Precision & Recall & F1 Score & Support \\
   & Total & 19 & 3 &
 \end{tabular}
 }
-\caption{Confusion matrices}
+\caption{Confusion matrices of boolean tests}
 \end{table}
+Before presenting the results about the detection method it's right to make a premise. The results that will be showed now are obtained using data that are composed only by texts coming from Twitter. For this reason they are not excellent but they have an ample room for improvement.
 
-\indent
+First of all, the tests were executed with 30 different Twitter accounts, some of them completely downloaded, some other only partially. Totally, 19 of them had children in their real life and shared something about it, 8 got married and shared something too, some of these lived both a marriage and a birth of a child, and one of them had two children. In addition to that, some other account that was not concerned with these two life event were added to the samples. Not all the 30 accounts were tested on both life events.
 
-Volgio dgbd.
+Secondly, two types of tests were made:
+\begin{itemize}
+\item A boolean valuation without consider the temporal factor, that indicates whether the detection reflects the fact that the subject of the analysis really experienced that event in his life.
+\item An evaluation on the quality of the time ranges returned.
+\end{itemize}
+For the first test, which is the classic test usually done with a classification problem, the results can be seen in the two confusion matrices, \ref{tab:weddingconf}~for weddings and \ref{tab:childrenconf}~for births respectively.
 
-edwefwf.
-
-
-
+For further details, the following are the results for wedding cases,
+\begin{gather}
+Accuracy = 0.83 \quad Precision = 1.0 \quad Recall = 0.5 \quad F_1\text{-}Score = 0.67
+\label{weddingconfdata}
+\end{gather}
+and for births of child
+\begin{gather}
+Accuracy = 0.59 \quad Precision = 1.0 \quad Recall = 0.53 \quad F_1\text{-}Score = 0.69
+\label{childrenconfdata}
+\end{gather}
+respectively.
 
