@@ -1,0 +1,17 @@
+\chapter{Conclusions}
+\label{cha:conclusions}
+This thesis presented a solution to detect two types of life events into social network timelines. It goes beyond the actual state of the art, because it's not limited to a post classification only, but it does a social profile analysis to discover an event. Furthermore, it uses a technique based on Wikipedia contents to understand what the user talkes about, which allows an easier training in terms of quantity and type of data: in fact in this way it's not necessary to have a training set for texts and one for photos, but just a set of \emph{posts} about life events, each of them can be made by texts only, picture only or both.
+
+The classifier showed some very good results, with both \emph{precision} and \emph{recall} measures around $0.9$, while the whole detection didn't have so good results, but considering that the tests were done using only textual tweets they can be considered accettable, and with ample room for improvement.
+
+\section{Future work}
+\label{sec:futurework}
+There are several aspects that can be deepened or added. First of all, this system was only projected to work with several social networks, but due to the reasons explained in section~\ref{sec:choices} only Twitter and textual contents were taken into consideration during the development phase. So the first possible addition can be adding the support for \emph{Facebook} and \emph{Instagram}, and also analyze images for post classification. Furthermore, this latters social media are more used than Twitter to share personal contents and news, such as the own marriage or the birth of a child, and many posts about life events are full of images, or even composed by images only.
+
+Another future expansion could be the addition of other life events, like graduation, buying a new home, changing a job, the death of somebody, etc. Each of them has its own meaning and brings with it a series of consequences or necessities.
+
+In addition to that, it's possible to combine the result coming from the detection algorithm with some demographic studies or some statistical data, to refine the results. In this way it would be possible to weight the information coming from social medias with external data, provided by some statistical institute or other trusted sources.
+
+Another possibility could be expand the machine learning capability of the system: in addition to the already current event detection, also predict a life event would give such a powerful piece of information.
+
+In conclusion, this thesis work offers a good base for detecting life events on social networks, which can be boosted or deepened in some aspects, for example, based on the scope in which it will be used, or on what type of users it will work mainly. Any addiction will still follow a logic or patterns very similar to those explained in this dissertion.

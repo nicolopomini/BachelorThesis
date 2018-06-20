@@ -54,6 +54,7 @@ For example, let's suppose to download contents made by a user who is signed up 
 Even though this architecture avoids as much as possible bottlenecks, a download request can take a very long time to be completed (even days), because each post from any social media has to pass through the semantic analyzers, which have a very restricted number of requests a day.
 
 \section{Implementation choices}
+\label{sec:choices}
 Due to the recent Cambridge Analytica scandal that involved Facebook, and with the consequent policy updates made by the social network, develop an application that works with Facebook products (Facebook itself and Instagram, for instance) that uses user's contents has become difficult. To do that, Facebook has to release a manual authorization after a demo video has been created to show what the application does. Even if a beta development had been used, it would have been hard to find enough users available to share their data for the development of this system. For these reasons it was decided to base the application on Twitter.
 
 Another issue is related with the external semantic analyzers: only free account has been used, which implies a very strict number of requests per day (1000). This means that currently a computation can take a very long time to be executed, even days, because each post has to be analyzed by this external services. Furthermore, image analyzers have free plan with only 1000 request a month, so it was decided to use only texts of posts, and to ignore images. All the obtained result, therefore, are only related with texts of tweets. On the other hand, some tests with images were executed, showing that the use of images would give better results: in fact, several posts of life events are composed only by images, so at the current situation they can't be classified correctly.
@@ -160,3 +161,4 @@ Sample & Precision & Recall & F1 Score & Support \\
 \section{Detection evaluation}
 \label{sec:detectioneva}
 \dots
+
