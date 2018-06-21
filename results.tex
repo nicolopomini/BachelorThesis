@@ -1,6 +1,6 @@
 \chapter{Implementation and evaluation}
 \label{cha:results}
-This chapter will present how the system was developed, giving a panoramic view of the interaction between components and a detailed focus on the solution chosen to deal with external services with a limited number of requests in a certain time range. After that, the development techniques for the classifier will be presented, along with the performance evaluation of the latter one, and finally an evaluation about the detection process will be provided.
+This chapter will present how a prototype of the system was developed, giving a panoramic view of the interaction between components and a detailed focus on the solution chosen to deal with external services with a limited number of requests in a certain time range. After that, the development techniques for the classifier will be presented, along with the performance evaluation of the latter one, and finally an evaluation about the detection process will be provided.
 
 \section{Component interactions and communications}
 \label{sec:view}
@@ -55,12 +55,13 @@ Even though this architecture avoids as much as possible bottlenecks, a download
 
 \section{Implementation choices}
 \label{sec:choices}
-Due to the recent Cambridge Analytica scandal that involved Facebook, and with the consequent policy updates made by the social network, develop an application that works with Facebook products (Facebook itself and Instagram, for instance) that uses user's contents has become difficult. To do that, Facebook has to release a manual authorization after a demo video has been created to show what the application does. Even if a beta development had been used, it would have been hard to find enough users available to share their data for the development of this system. For these reasons it was decided to base the application on Twitter.
+Due to the recent Cambridge Analytica scandal that involved Facebook, and with the consequent policy updates made by the social network, develop an application that works with the products of this latter (Facebook itself and Instagram, for instance) that uses user's contents has become difficult. To do that, Facebook has to release a manual authorization for the app, and the process to obtain it requires a demo video to show what the application does, and a detailed description of how user data is used. Even if a beta development had been used, it would have been hard to find enough users available to share their data for the development of this system. For these reasons it was decided to base the application on Twitter.
+
+Another point worth of noting is that the developed software is only a demo: in fact, the use of social network data for commercial purposes without explicit user authorization violates the terms of use of the latter. Furthermore, the processing of personal data in Europe is regulated by the General Data Protection Regulation (GDPR), and the use of those data must be authorized by the owner of them (the author herself) via \emph{social login}.
 
 Another issue is related with the external semantic analyzers: only free account has been used, which implies a very strict number of requests per day (1000). This means that currently a computation can take a very long time to be executed, even days, because each post has to be analyzed by this external services. Furthermore, image analyzers have free plan with only 1000 request a month, so it was decided to use only texts of posts, and to ignore images. All the obtained result, therefore, are only related with texts of tweets. On the other hand, some tests with images were executed, showing that the use of images would give better results: in fact, several posts of life events are composed only by images, so at the current situation they can't be classified correctly.
 
-About implementation, the system is developed in Python, using some standard libraries for machine learning and mathematical purposes: the classifiers  
-are those available in the \texttt{scikit-learn}\footnote{\url{scikit-learn.org}} library \cite{scikit-learn}, while for numerical arrays, matrices and other mathematical functions the \texttt{NumPy}\footnote{\url{www.numpy.org}} library \cite{oliphant2006guide} is chosen. Data is stored and organized using a \texttt{MongoDB} database\footnote{\url{www.mongodb.com}}. Last but not least, the external semantic analyzer for texts is called \texttt{Dandelion}\footnote{\url{dandelion.eu}} made by SpazioDati S.r.l.\footnote{\url{spaziodati.eu}}. Some test with images were also performed, using the \texttt{Cloud Vision API} of Google Cloud\footnote{\url{cloud.google.com/vision}}.
+About implementation, the system is developed in Python, using some standard libraries for machine learning and mathematical purposes: the classifiers are those available in the \texttt{scikit-learn}\footnote{\url{scikit-learn.org}} library \cite{scikit-learn}, while for numerical arrays, matrices and other mathematical functions the \texttt{NumPy}\footnote{\url{www.numpy.org}} library \cite{oliphant2006guide} is chosen. Data is stored and organized using a \texttt{MongoDB} database\footnote{\url{www.mongodb.com}}. Last but not least, the external semantic analyzer for texts is called \texttt{Dandelion}\footnote{\url{dandelion.eu}} made by SpazioDati S.r.l.\footnote{\url{spaziodati.eu}}. Some test with images were also performed, using the \texttt{Cloud Vision API} of Google Cloud\footnote{\url{cloud.google.com/vision}}.
 
 \section{Feature extraction}
 \label{sec:featurextraction}
@@ -129,7 +130,7 @@ T(\text{\texttt{Having children}}, \text{english}) = \{&(\text{"birth"}, \text{ 
 \end{split}
 \end{equation*}
 
-The results with the dataset of \cite{dickinson2015identifying} were a little worse than those of the bayesian classifier shown in tables~\ref{tab:singlesplit} and \ref{tab:kfold}, but in the reality, with a test conducted on 5836 tweets taken by 43 different timelines the results were much better than the previous one, as explained in tables~\ref{tab:treewedding} and \ref{tab:treechild}.
+The results with the dataset of \cite{dickinson2015identifying} were a little worse than those of the bayesian classifier shown in tables~\ref{tab:singlesplit} and \ref{tab:kfold}, but in the reality, with a test conducted on 5836 tweets taken by 44 different timelines the results were much better than the previous one, as explained in tables~\ref{tab:treewedding} and \ref{tab:treechild}.
 
 \begin{table}[htbp]
 \centering
@@ -171,8 +172,8 @@ Sample & Precision & Recall & F1 Score & Support \\
     & \multicolumn{2}{c}{\bfseries Prediction outcome} & \\
   & & \bfseries True & \bfseries False & \bfseries Total \\
   & True & \MyBox{4}{} & \MyBox{0}{} & 4 \\[2.4em]
-  & False & \MyBox{4}{} & \MyBox{15}{} & 19 \\
-  & Total & 8 & 15 &
+  & False & \MyBox{4}{} & \MyBox{22}{} & 26 \\
+  & Total & 8 & 22 & 30
 \end{tabular}
 }
 \quad
@@ -181,33 +182,103 @@ Sample & Precision & Recall & F1 Score & Support \\
   \multirow{10}{*}{\parbox{1.1cm}{\bfseries\raggedleft Actual\\ value}} & 
     & \multicolumn{2}{c}{\bfseries Prediction outcome} & \\
   & & \bfseries True & \bfseries False & \bfseries Total \\
-  & True & \MyBox{10}{} & \MyBox{0}{} & 10 \\[2.4em]
-  & False & \MyBox{9}{} & \MyBox{3}{} & 12 \\
-  & Total & 19 & 3 &
+  & True & \MyBox{12}{} & \MyBox{0}{} & 12 \\[2.4em]
+  & False & \MyBox{9}{} & \MyBox{9}{} & 18 \\
+  & Total & 21 & 9 & 30
 \end{tabular}
 }
 \caption{Confusion matrices of boolean tests}
 \end{table}
-Before presenting the results about the detection method it's right to make a premise. The results that will be showed now are obtained using data that are composed only by texts coming from Twitter. For this reason they are not excellent but they have an ample room for improvement.
+Before presenting the results about the detection method it's right to make a premise. The results that will be showed now are obtained using data that are composed only by texts coming from Twitter. The reason why Twitter was used is because it has the easiest policy for download authorization: while on Facebook is necessary the explicit permission of both the social network and the user for downloading and using personal data, Twitter allows to use it for non commercial purposes just registering a developer account. In addition to that, images were not used because semantic analyzer services for photos allow only 1000 requests a month freely, so it was not computationally possible to process thousands of posts with images. Some isolated tests with images was tried, ando posts about life events that hadn't been classified correctly using their texts were correctly by their photos.
 
-First of all, the tests were executed with 30 different Twitter accounts, some of them completely downloaded, some other only partially. Totally, 19 of them had children in their real life and shared something about it, 8 got married and shared something too, some of these lived both a marriage and a birth of a child, and one of them had two children. In addition to that, some other account that was not concerned with these two life event were added to the samples. Not all the 30 accounts were tested on both life events.
+First of all, the tests were executed with 30 different Twitter accounts, some of them completely downloaded, some other only partially. Totally, 21 users had children in their real life and shared something about it, 8 got married and shared something too, six of which lived both a marriage and a birth of a child. In addition to that, 7 other account that was not concerned with these two life event were added to the samples. The reason why only 30 account were downloaded (and some of them partially) is always because of semantic analyzer free plans: in fact \texttt{Dandelion} offers 1000 requests a day for free, and for each post two requests were necessary: one for Wikipedia entities, and one for the sentiment score; the necessary machine time to download completely an account could be greater than a week.
 
 Secondly, two types of tests were made:
 \begin{itemize}
-\item A boolean valuation without consider the temporal factor, that indicates whether the detection reflects the fact that the subject of the analysis really experienced that event in his life.
+\item A boolean valuation without consider the temporal factor, that indicates whether the detection reflects the fact that the subject of the analysis really experienced that event in a some time in his life.
 \item An evaluation on the quality of the time ranges returned.
 \end{itemize}
 For the first test, which is the classic test usually done with a classification problem, the results can be seen in the two confusion matrices, \ref{tab:weddingconf}~for weddings and \ref{tab:childrenconf}~for births respectively.
 
 For further details, the following are the results for wedding cases,
 \begin{gather}
-Accuracy = 0.83 \quad Precision = 1.0 \quad Recall = 0.5 \quad F_1\text{-}Score = 0.67
+Accuracy = 0.87 \quad Precision = 1.0 \quad Recall = 0.50 \quad F_1\text{-}Score = 0.67
 \label{weddingconfdata}
 \end{gather}
 and for births of child
 \begin{gather}
-Accuracy = 0.59 \quad Precision = 1.0 \quad Recall = 0.53 \quad F_1\text{-}Score = 0.69
+Accuracy = 0.70 \quad Precision = 1.0 \quad Recall = 0.57 \quad F_1\text{-}Score = 0.73
 \label{childrenconfdata}
 \end{gather}
 respectively.
+
+\setlength{\tabcolsep}{9pt}
+\begin{table}[htbp]
+\centering
+\subtable[Time ranges about weddings\label{tab:rangeswedding}]{%
+\begin{tabular}{cccc}
+\hline
+\multicolumn{2}{c}{\textbf{Detection result}} & \multirow{2}*{\textbf{Ground Truth}} & \multirow{2}*{\textbf{Correctness}} \\
+\textbf{From} & \textbf{To} & \\
+\hline
+22/09/2015 & 22/09/2015 & 03/10/2015 & False \\
+09/08/2016 & 09/08/2016 & 07/11/2016 & False \\
+14/05/2016 & 13/06/2016 & 13/06/2016 & True \\
+15/05/2018 & 20/05/2018 & 15/05/2018 & True \\
+\hline
+\end{tabular}
+}\qquad\qquad
+\subtable[Time ranges about births of a child\label{tab:rangeschild}]{%
+\begin{tabular}{cccc}
+\hline
+\multicolumn{2}{c}{\textbf{Detection result}} & \multirow{2}*{\textbf{Ground Truth}} & \multirow{2}*{\textbf{Correctness}} \\
+\textbf{From} & \textbf{To} & \\
+\hline
+13/05/2018 & 13/05/2018 & 13/05/2018 & True \\
+17/03/2016 & 17/03/2016 & 20/07/2016 & False \\
+25/10/2017 & 17/11/2017 & 26/10/2017 & True \\
+07/11/2015 & 18/11/2015 & 18/12/2015 & False \\
+15/01/2015 & 15/01/2015 & 15/01/2015 & True \\
+22/03/2016 & 22/03/2016 & 22/03/2016 & True \\
+09/03/2018 & 08/05/2018 & 08/05/2018 & True \\
+05/01/2012 & 05/01/2012 & 05/01/2012 & True \\
+14/07/2011 & 14/07/2011 & 14/07/2011 & True \\
+22/12/2016 & 22/12/2016 & 22/12/2016 & True \\
+16/10/2016 & 16/10/2016 & 01/04/2017 & False \\
+04/01/2017 & 26/08/2017 & 30/07/2017 & True \\
+\hline
+\end{tabular}
+}
+\caption{The list of tests made on \emph{true positive} samples. The first two columns represent the time range outputted by the detection, the third is the real date of the event, and the last one indicates if the result is correct or not.}
+\end{table}
+
+\setlength{\tabcolsep}{6pt}
+\begin{table}
+\label{tab:correctintervals}
+\centering
+\begin{tabular}{cccc}
+\multicolumn{4}{c}{\textbf{Correct intervals}} \\
+\hline
+\textbf{Life event} & \textbf{Length} (days) & \textbf{\emph{Left} space} (days) & \textbf{\emph{Right} space} (days) \\
+\hline
+\multirow{2}*{\texttt{Getting married}} & 31 & 30 & 0 \\
+& 6 & 0 & 5 \\
+\hline
+\multirow{9}*{\texttt{Having children}} & 1 & 0 & 0 \\
+& 24 & 1 & 22 \\
+& 1 & 0 & 0 \\
+& 1 & 0 & 0 \\
+& 61 & 60 & 0 \\
+& 1 & 0 & 0 \\
+& 1 & 0 & 0 \\
+& 1 & 0 & 0 \\
+& 235 & 207 & 27 \\
+\hline
+\end{tabular}
+\caption{Details about the correct intervals. \emph{Left space} indicates the number of days between the starting point of the interval and the real date of the event, while the \emph{right space} is the number of days from the event to the end of the interval.}
+\end{table}
+
+The second type of test was done only on the \emph{true positive} samples of the first test, that are those samples that lived a \emph{life event} in their real life and for whom a time range was returned by the algorithm. Firstly, the correctness of the time ranges compared to the ground truth of the event was checked, as can be seen in table~\ref{tab:rangeswedding} for the weddings and in table~\ref{tab:rangeschild} for the births. Then, for the correct results the length and the "displacement" of the intervals were analyzed, while for the wrong detection the error expressed in number of days were reported.
+
+In particular, the results about correct intervals are shown in table~\ref{tab:correctintervals}: as can be seen, the most of the intervals are shorter than a week, this because users tend to speak about life events when they are very close to leave them. Furthermore, 6 users posted about the birth of their child only the day the event happened, for this reason the beginning and the end of the interval overlap. Those that last for weeks or months indicate that the user decided to announce the life event some time before its happening, or spoke about it even some days after it occured. Another point worth to notice is that the intervals are very unbalanced: the life event almost always falls near an extreme of the time range, or right on it. This means that users usually talk about the event or only before it happens, or only later.
 
