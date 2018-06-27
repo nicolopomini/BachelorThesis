@@ -52,7 +52,7 @@ The computation request is much easier, because it only works with data within t
 \begin{figure}
 \centering
 \includegraphics[width=%
-0.85\textwidth]{img/Queues}
+0.65\textwidth]{img/Queues}
 \caption{The route of a download request. From the endpoint, data is divided in independent streams, one for each social media, and each stream is enqueued in the corresponding queue. The red, green and purple frames represents three different social network download system -- for example the red one for Facebook, the green one for Twitter and the purple one for Instagram. Once data is downloaded, it is saved into the database, and posts are given to the semantic analyzers, represented by the orange and blue frames: one for texts and one for images.}
 \label{fig:queues}
 \end{figure}
@@ -142,7 +142,7 @@ T(\text{\texttt{Having children}}, \text{english}) = \{&(\text{"birth"}, \text{ 
 
 The results with the dataset of \cite{dickinson2015identifying} were a little worse than those of the bayesian classifier shown in tables~\ref{tab:singlesplit} and \ref{tab:kfold}, but in the reality, with a test conducted on 5836 tweets taken by 44 different timelines the results were much better than the previous one, as explained in tables~\ref{tab:treewedding} and \ref{tab:treechild}.
 
-\begin{table}[htbp]
+\begin{table}[h]
 \centering
 \subtable[Results about wedding tweets\label{tab:treewedding}]{%
 \begin{tabular}{ccccc}
@@ -203,7 +203,7 @@ Before presenting the results about the detection method it's right to make a pr
 
 First of all, the tests were executed with 30 different Twitter accounts, some of them completely downloaded, some other only partially. Totally, 21 users had children in their real life and shared something about it, 8 got married and shared something too, six of which lived both a marriage and a birth of a child. In addition to that, 7 other account that was not concerned with these two life event were added to the samples. The reason why only 30 account were downloaded (and some of them partially) is always because of semantic analyzer free plans: in fact \texttt{Dandelion} offers 1000 requests a day for free, and for each post two requests were necessary: one for Wikipedia entities, and one for the sentiment score. Thus, the necessary machine time to download completely an account could be greater than a week.
 
-Secondly, the parameters setted for the detection algorithm, whose meanings can be seen in section~\ref{sec:computationperformer}, were the following: $p_1 = 0.6$, $p_2 = 0.4$, $\alpha = 0$, $ \beta = 2$, $ \gamma = 182$.
+Secondly, the parameters setted for the detection algorithm, whose meanings can be seen in section~\ref{sec:computationperformer}, were the following: $p_1 = 0.6$, $p_2 = 0.4$, $\alpha = 0.0$, $ \beta = 2$, $ \gamma = 182$.
 
 Thirdly, two types of tests were made:
 \begin{itemize}
@@ -234,9 +234,9 @@ respectively.
 \textbf{From} & \textbf{To} & \\
 \hline
 22/09/2015 & 22/09/2015 & 03/10/2015 & False \\
-09/08/2016 & 09/08/2016 & 07/11/2016 & False \\
-14/05/2016 & 13/06/2016 & 13/06/2016 & True \\
-15/05/2018 & 20/05/2018 & 15/05/2018 & True \\
+$^{(7)}$09/08/2016 & 09/08/2016 & 07/11/2015 & False \\
+$^{(3)}$14/05/2016 & 13/06/2016 & 13/06/2016 & True \\
+$^{(4)}$15/05/2018 & 20/05/2018 & 15/05/2018 & True \\
 \hline
 \end{tabular}
 }\qquad\qquad
@@ -246,22 +246,22 @@ respectively.
 \multicolumn{2}{c}{\textbf{Detection result}} & \multirow{2}*{\textbf{Ground Truth}} & \multirow{2}*{\textbf{Correctness}} \\
 \textbf{From} & \textbf{To} & \\
 \hline
-13/05/2018 & 13/05/2018 & 13/05/2018 & True \\
-17/03/2016 & 17/03/2016 & 20/07/2016 & False \\
+$^{(5)}$13/05/2018 & 13/05/2018 & 13/05/2018 & True \\
+$^{(6)}$17/03/2016 & 17/03/2016 & 20/07/2016 & False \\
 25/10/2017 & 17/11/2017 & 26/10/2017 & True \\
 07/11/2015 & 18/11/2015 & 18/12/2015 & False \\
 15/01/2015 & 15/01/2015 & 15/01/2015 & True \\
 22/03/2016 & 22/03/2016 & 22/03/2016 & True \\
-09/03/2018 & 08/05/2018 & 08/05/2018 & True \\
+$^{(2)}$09/03/2018 & 08/05/2018 & 08/05/2018 & True \\
 05/01/2012 & 05/01/2012 & 05/01/2012 & True \\
 14/07/2011 & 14/07/2011 & 14/07/2011 & True \\
 22/12/2016 & 22/12/2016 & 22/12/2016 & True \\
 16/10/2016 & 16/10/2016 & 01/04/2017 & False \\
-04/01/2017 & 26/08/2017 & 30/07/2017 & True \\
+$^{(1)}$04/01/2017 & 26/08/2017 & 30/07/2017 & True \\
 \hline
 \end{tabular}
 }
-\caption{The list of tests made on \emph{true positive} samples. The first two columns represent the time range outputted by the detection, the third is the real date of the event, and the last one indicates if the result is correct or not.}
+\caption{The list of tests made on \emph{true positive} samples. The first two columns represent the time range outputted by the detection, the third is the real date of the event, and the last one indicates if the result is correct or not. The numbered results are graphically represented in Figure~\ref{fig:timeranges}.}
 \end{table}
 
 \setlength{\tabcolsep}{6pt}
@@ -308,6 +308,14 @@ respectively.
 \end{tabular}
 \caption{Details about the wrong intervals. The distance is the difference in days between the date of the real event and the nearest extreme of the interval. Positive values indicate that the detected interval finishes before the ground truth of the event, while a negative value indicates that the time range starts after the date of the event.}
 \end{table}
+
+\begin{sidewaysfigure}
+\centering
+\includegraphics[width=%
+1\textwidth]{img/Timeranges}
+\caption{A graphical representation of the results in Table~\ref{tab:rangeswedding} and Table~\ref{tab:rangeschild}. Each time line is composed by 364 days (52 weeks), the red slice is the output of the detection, while the black bar is the ground truth. Case~(1) shows a very large but correct detection, cases~(2) and~(3) are detections in the order of magnitude of the month, cases~(4) and~(5) are the most precised detections, with a length within a week. Finally, cases~(6) and~(7) are wrong detection. As can be seen in the correct detections, the ground truth stays very near to an extreme of the interval.}
+\label{fig:timeranges}
+\end{sidewaysfigure}
 
 The second type of test was done only on the \emph{true positive} samples of the first test, that are those samples that lived a \emph{life event} in their real life and for whom a time range was returned by the algorithm. Firstly, the correctness of the time ranges compared to the ground truth of the event was checked, as can be seen in table~\ref{tab:rangeswedding} for the weddings and in table~\ref{tab:rangeschild} for the births. Then, for the correct results the length and the "displacement" of the intervals were analyzed, while for the wrong detection the error expressed in number of days were reported.
 
