@@ -65,7 +65,7 @@ By default, everything that is returned by the external analyzer could be given 
 \subsection{Classifier}
 This part has the fundamental purpose to decide whether a post is about or not to a certain life event. Its task is to extract some features from the posts previously downloaded, and apply some machine learning algorithm to take this decision. As explained in section~\ref{sec:dataset}, the standard approach to classify textual contents in multiple languages is to have a great number of examples for each tongue; in this thesis a different approach is tried, using entities and topics instead of single words, for two reasons. In this way is enough to train the classifier with a single dataset in a given language $ L $ - english - and for all the contents that are not in the $ L $ language is just necessary to map all the entities in the respectives of $L$. In addition to that, with this technique is possible to consider both photos and texts as the same thing: they are just \emph{entity containers}, and it's not necessary to treat them separately. All the keys entities for a life event exist in several languages, so this mapping procedure should easily be successful: for example, the english entity \texttt{Infant} for the birth of a child event is translated in 82 languages. English is chosen as main language because the english version of Wikipedia has a number of articles at least 5 times bigger than any other language. A point worth of noting is that the classifier uses only the vertices of the Wikipedia graph, most of which exist in several languages, and not the graph structure, which is different for each Wikipedia version.
 
-At this point the current situation is, for each user taken into analysis, a list of posts - made by texts, attachments and images - enriched with semantic entities, topics and sentiment score. The input is a tuple (or a list of tuples) made by a post, composed as just described, and a life event of interest, for which we want to predict if the post is about it. A life event could be represented by an unique string, e.g. "\texttt{GETTING\char`_MARRIED}" for a wedding, or alternatively by an integer ID.
+At this point the current situation is, for each user taken into analysis, a list of posts - made by texts, attachments and images - enriched with semantic entities, topics and sentiment score. The input for the classifier is a tuple (or a list of tuples) made by a post, composed as just described, and a life event of interest, for which we want to predict if the post is about it. A life event could be represented by an unique string, e.g. "\texttt{GETTING\char`_MARRIED}" for a wedding, or alternatively by an integer ID.
 
 As output, the probability with which the post (or the list of posts) concerns with the life event is expected.
 
@@ -88,7 +88,7 @@ At this point, a timeline is composed by a list of post, each one with the proba
 \[
 \mu_\text{likes} = \frac{1}{n} \sum_{i=1}^n p_i.likes \quad \mu_\text{shares} = \frac{1}{n} \sum_{i=1}^n p_i.shares \quad \mu_\text{sentiment} = \frac{1}{n} \sum_{i=1}^n p_i.sentiment
 \]
-the average of likes, shares and sentiment among all the user's post. If 
+the average of likes, shares and sentiment score among all the user's post. If 
 \begin{gather}
 \label{avgs}
 p.likes > \mu_\text{likes} \land p.shares > \mu_\text{shares} \land p.sentiment > \mu_\text{sentiment}
@@ -104,7 +104,7 @@ where $r(d)$ is the number of posts related to the life event written the day $d
 
 Of course, the timeline is already targeted with the life event taken into consideration. In other words, the life event to monitor is chosen in the previous steps: at this point the timeline is labelled only for a single life event. Once the frequency has been computed for every day, it can be plotted over time, and at the moment $f$ passes a given threshold $\alpha$, the life event is begun. When a minimum number of days $\beta$ in which $f(t) > \alpha$ are found, the life event can be considered as detected. By the time in $\gamma$ days there are no \emph{active days}, the life event can be seen as over.
 
-As input is expected a list of boolean label with a timestamp, that represents the user's timeline in function to a life event.
+As input is expected a list of probabilities, each one with a timestamp, that represents the user's timeline in function to a life event.
 
 As output, a list with time ranges in which the life events have been detected is expected (this range can be composed by the date of the first and the last post related to the life event). Of course, the user may have not lived the life event, so in this case the list will be empty.
 
@@ -173,7 +173,7 @@ Post & & \\
 \end{tabular}
 \end{center}
 
-Now the API of the four logical component are presented. Each one can be seen as a web interface that accepts and returns JSON objects. Every time that an object described just above here is used, only the parameters to uniquely identify an instance of these objects will be used. For example, only a \texttt{userID} will be used to indicate an \texttt{User} instance.
+Now the API of the four logical component are presented. Each one can be seen as a web interface that accepts and returns JSON objects. Every time that an object described just above here is used, only the parameters to uniquely identify an instance of these objects are passed as parameters. For example, only a \texttt{userID} is used to indicate an \texttt{User} instance.
 
 \subsection{Collector API}
 The collector needs a \texttt{User} instance to which fetch her contents online, and a count that indicates how many activities to download from each social network.
@@ -303,7 +303,7 @@ An example of input and output is presented below.
 \section{The detection algorithm}
 \label{sec:alg}
 
-In this subsection the detection algorithm, whose logic was previously explained in section~\ref{sec:computationperformer}, is defined in pseudocode. It is assumed that all the parameters previously highlighted in~\ref{sec:computationperformer} are defined, and that all the three previous logical steps are already been executed. Let $n$ be the number of posts in the timeline taken into analysis, and let the data type \texttt{Post} be defined as in~\ref{tab:post}.
+In this part the detection algorithm, whose logic was previously explained in Section~\ref{sec:computationperformer}, is defined in pseudocode. It is assumed that all the parameters previously highlighted in~\ref{sec:computationperformer} are defined, and that all the three previous logical steps are already been executed. Let $n$ be the number of posts in the timeline taken into analysis, and let the data type \texttt{Post} be defined as in~\ref{tab:post}.
 
 The algorithm is composed by two main parts. In the first part, the goal is to compute the average number of likes and shares received by the user among her posts, and the average sentiment score. After that, all the posts are grouped by date of publication, creating a dictionary with the days in which the user has published something as keys ($k$ indicates a single key), and as values the tuple (posts related with the life event on day $k$, all posts on day $k$). This is explain in Algorithm~\ref{freq_computing}.
 
