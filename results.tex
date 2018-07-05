@@ -2,7 +2,7 @@
 \label{cha:results}
 This chapter presents how a prototype of the system has been developed, giving a panoramic view of the interaction between components and a detailed focus on the solution chosen to deal with external services with a limited number of requests in a certain time range. After that, the development techniques for the classifier are presented, along with the performance evaluation of the latter one, and finally an evaluation about the detection process is provided.
 
-For the evaluation, confusion matrices and some measures derived from them are used. A confusion matrix is a table layout used to show the results of a classification algorithm. Its rows represent the prediction output by the algorithm, while the columns represents the real class of the samples. In case of binary classifications, like those in this thesis, the matrix has 4 cells: the top-left one is a counter of the \emph{true positives} ($TP$) samples, the top-right for the \emph{false positives} ($FP$), bottom-left for \emph{false negatives} ($FN$), and finally bottom-right for \emph{true negatives} ($TP$). The sum of the four counters gives the number of samples analyzed. On these numbers, 4 measures are used:
+For the evaluation, confusion matrices and some measures derived from them are used. A confusion matrix is a table layout used to show the results of a classification algorithm. Its rows represent the prediction output by the algorithm, while the columns represents the real class of the samples. In case of binary classifications, like those in this thesis, the matrix has 4 cells: the top-left one is a counter of the \emph{true positives} ($TP$) samples, the top-right for the \emph{false negatives} ($FN$), bottom-left for \emph{false positives} ($FP$), and finally bottom-right for \emph{true negatives} ($TP$). The sum of the four counters gives the number of samples analyzed. On these numbers, 4 measures are used:
 \begin{equation*}
 \begin{split}
 \text{Accuracy} & = \frac{TP + TN}{TP + TN + FP + FN}\\
@@ -181,9 +181,9 @@ Sample & Precision & Recall & F1 Score & Support \\
   \multirow{10}{*}{\parbox{1.1cm}{\bfseries\raggedleft Actual\\ value}} & 
     & \multicolumn{2}{c}{\bfseries Prediction outcome} & \\
   & & \bfseries True & \bfseries False & \bfseries Total \\
-  & True & \MyBox{4}{} & \MyBox{0}{} & 4 \\[2.4em]
-  & False & \MyBox{4}{} & \MyBox{22}{} & 26 \\
-  & Total & 8 & 22 & 30
+  & True & \MyBox{4}{} & \MyBox{4}{} & 8 \\[2.4em]
+  & False & \MyBox{0}{} & \MyBox{22}{} & 22 \\
+  & Total & 4 & 26 & 30
 \end{tabular}
 }
 \quad
@@ -192,9 +192,9 @@ Sample & Precision & Recall & F1 Score & Support \\
   \multirow{10}{*}{\parbox{1.1cm}{\bfseries\raggedleft Actual\\ value}} & 
     & \multicolumn{2}{c}{\bfseries Prediction outcome} & \\
   & & \bfseries True & \bfseries False & \bfseries Total \\
-  & True & \MyBox{12}{} & \MyBox{0}{} & 12 \\[2.4em]
-  & False & \MyBox{9}{} & \MyBox{9}{} & 18 \\
-  & Total & 21 & 9 & 30
+  & True & \MyBox{12}{} & \MyBox{9}{} & 21 \\[2.4em]
+  & False & \MyBox{0}{} & \MyBox{9}{} & 9 \\
+  & Total & 12 & 18 & 30
 \end{tabular}
 }
 \caption{Confusion matrices of boolean tests}
@@ -313,7 +313,7 @@ $^{(1)}$04/01/2017 & 26/08/2017 & 30/07/2017 & True \\
 \centering
 \includegraphics[width=%
 1\textwidth]{img/Timeranges}
-\caption{A graphical representation of the results in Table~\ref{tab:rangeswedding} and Table~\ref{tab:rangeschild}. In each time line, composed by 364 days (52 weeks), the red slice is the output of the detection, while the black bar is the ground truth. Case~(1) shows a very large but correct detection, cases~(2) and~(3) are detections in the order of magnitude of the month, cases~(4) and~(5) are the most precised detections, with a length within a week. Finally, cases~(6) and~(7) are wrong detection. As can be seen in the correct detections, the ground truth stays very near to an extreme of the interval.}
+\caption{A graphical representation of the results in Table~\ref{tab:rangeswedding} and Table~\ref{tab:rangeschild}. In each time line, composed by 364 days (52 weeks), the light blue slice is the output of the detection, while the red vertical bar is the date of the real event. Case~(1) shows a very large but correct detection, cases~(2) and~(3) are detections in the order of magnitude of the month, cases~(4) and~(5) are the most precised detections, with a length within a week. Finally, cases~(6) and~(7) are wrong detection. As can be seen in the correct detections, the ground truth stays very near to an extreme of the interval: this depends on how the user behaves in sharing news about her private life. When the the date of the real event is near to the right extreme of the interval, this means that the user announced the live event some time before its happening, while contrariwise if the event is near the left extreme, it means that the user preferred to share something later the event. The first pattern is the most common, expecially with births of child, while the second one is rarer, used sometimes with weddings.}
 \label{fig:timeranges}
 \end{sidewaysfigure}
 
