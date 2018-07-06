@@ -9,8 +9,10 @@ The identification of a life event into social media contents is a \emph{machine
 
 A classification task has the goal of assigning a belonging class to a given object. The input is composed by a tuple of \emph{features} that characterize the object, usually made by numbers, and the output is a categorical variable, such as a "yes/no" label. In other words, it can be seen as a mathematical function, that maps a vector $ \boldsymbol{x} \in \mathbb{R}^n $ to an answer $ y \in C $
 \begin{gather*}
-f \colon \mathbb{R}^n \to C \\
-f \colon \boldsymbol{x} \mapsto y
+\begin{split}
+f & \colon \mathbb{R}^n \to C \\
+f & \colon \boldsymbol{x} \mapsto y
+\end{split}
 \end{gather*}
 where $C$ is a set of possible categories. A famous educational example of this kind of problem is the Iris flower classification\footnote{\url{en.wikipedia.org/wiki/Iris_flower_data_set}}, where the input $ \boldsymbol{x} $ is composed by the sepal and petal widths and lengths in cm of the flower, and $C = \{\text{\texttt{Iris setosa}, \texttt{Iris virginica}, \texttt{Iris versicolor}}\}$. For each sample composed by 4 measures the belonging class is predicted.
 
