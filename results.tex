@@ -17,7 +17,7 @@ For the evaluation, confusion matrices and some measures derived from them are u
 \begin{figure}
 \centering
 \includegraphics[width=%
-1.0\textwidth]{img/Globalview}
+0.7\textwidth]{img/Globalview}
 \caption{A global view of the system with the data exchanged between the components. Grey arrows are queues of inputs, while white arrows are messages of a class method call.}
 \label{fig:globalview}
 \end{figure}
@@ -36,7 +36,7 @@ The request handler is the user's endpoint of the system, the only access point 
 
 The download request will be described in detail in Section~\ref{sec:downloadqueues}, because due to the use of external services it is not immediate to explain.
 
-The computation request is much easier, because it only works with data within the system, without any external service. Each request is fulfilled with the personal data of the user in analysis present at the moment of the request. This process can be seen in the lower part of Figure~\ref{fig:globalview}. User's posts are firstly classified as related or not to the life event taken into analysis, and then data is given to the computator part to detect the life events into user's timeline, as explained in Section~\ref{sec:computationperformer}. 
+The computation request is much easier, because it only works with data within the system, without any external service. Each request is fulfilled with the personal data of the user in analysis present at the moment of the request. This process can be seen in the lower part of Figure~\ref{fig:globalview}. User's posts are firstly classified as related or not to the life event taken into analysis, and then data is given to the timeline analyzer part to detect the life events into user's timeline, as explained in Section~\ref{sec:computationperformer}. 
 
 \subsection{A queue system to download user's contents}
 \label{sec:downloadqueues}
@@ -67,7 +67,7 @@ Even though this architecture avoids as much as possible bottlenecks, a download
 \label{sec:choices}
 Due to the recent Cambridge Analytica scandal that involved Facebook, and with the consequent policy updates made by the social network, develop an application that works with the products of this latter (Facebook itself and Instagram, for instance) that uses user's contents has become difficult. To do that, Facebook has to release a manual authorization for the app, and the process to obtain it requires a demo video to show what the application does, and a detailed description of how user data is used. Even if a beta development had been used, it would have been hard to find enough users available to share their data for the development of this system. For these reasons it was decided to base the prototype on Twitter.
 
-Another point worth of noting is that the developed software is only a demo: in fact, the use of social network data for commercial purposes without explicit user authorization violates the terms of use of the latter. Furthermore, the processing of personal data in Europe is regulated by the General Data Protection Regulation (GDPR), and the use of those data must be authorized by the owner of them (the author herself) via \emph{social login}.
+Another point worth of noting is that the developed software is only a demo: in fact, the use of social network data for commercial purposes without explicit user authorization violates the terms of use of the latter. Furthermore, the processing of personal data in Europe is regulated by the General Data Protection Regulation (GDPR), and the use of those data must be authorized by the owner of them (the author herself), for example via \emph{social login}.
 
 Another issue is related with the external semantic analyzers: only a free account has been used, which implies a very strict number of requests per day (1000). This means that currently a computation can take a very long time to be executed, even days, because each post has to be analyzed by this external services. Furthermore, image analyzers have free plan with only 1000 request a month, so it was decided to use only texts of posts, and to ignore images. All the obtained result, therefore, are only related with texts of tweets. On the other hand, some tests with images were executed, showing that the use of images would give better results: in fact, several posts of life events are composed only by images, so at the current situation they cannot be classified correctly.
 
