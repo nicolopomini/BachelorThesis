@@ -42,8 +42,8 @@
 \singlespacing
 
 \usepackage[english]{babel}
-\usepackage{caption}
-\captionsetup[table]{position=below}
+\usepackage{chngcntr}
+\counterwithout{footnote}{chapter}
 
 \newcommand\MyBox[2]{
   \fbox{\lower0.75cm
@@ -105,7 +105,7 @@
       % nessuna interruzione di pagina tra capitoli
       % ridefinizione dei comandi di clear page
       \renewcommand{\cleardoublepage}{} 
-      \renewcommand{\clearpage}{} 
+
       % redefinizione del formato del titolo del capitolo
       % da formato
       %   Capitolo X
@@ -122,6 +122,8 @@
       
       % sommario
       \input{sommario}
+      \clearpage
+      \renewcommand{\clearpage}{} 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Nota

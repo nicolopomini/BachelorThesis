@@ -1,17 +1,16 @@
 \chapter{System design}
 \label{cha:design}
+In this chapter the design process is presented, starting from the requirements and the description of the working logic. After that, a more schematic view is provided, explaining how the system is designed and how the components work and communicate each other. At the end, the algorithms used to compute the outputs are presented and explained.
 
-\begin{figure}
+Seen as a black-box -- in Figure~\ref{fig:bb} -- the system takes two inputs: all the user's activities in the social networks she is registered in, and a life event to search for, and it returns as output a yes/no answer to the question "\textit{has this user lived this life event?}", with a time reference estimation attached.
+
+\begin{figure}[H]
 \centering
 \includegraphics[width=%
 0.95\textwidth]{img/bb}
 \caption{A black box view of the problem.}
 \label{fig:bb}
 \end{figure}
-
-In this chapter the design process is presented, starting from the requirements and the description of the working logic. After that, a more schematic view is provided, explaining how the system is designed and how the components work and communicate each other. At the end, the algorithms used to compute the outputs are presented and explained.
-
-Seen as a black-box -- in Figure~\ref{fig:bb} -- the system takes two inputs: all the user's activities in the social networks she is registered in, and a life event to search for, and it returns as output a yes/no answer to the question "\textit{has this user lived this life event?}", with a time reference estimation attached.
 
 \section{Requirements}
 
@@ -27,7 +26,7 @@ S = \{\text{\texttt{Getting married}}, \text{ \texttt{Having children}}\}
 \section{Logical components}
 \label{sec:logicdescr}
 
-\begin{figure}
+\begin{figure}[H]
 \centering
 \includegraphics[width=%
 0.95\textwidth]{img/Solutiondesign_nutshell}
