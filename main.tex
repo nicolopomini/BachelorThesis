@@ -52,6 +52,7 @@
       \vfil}%
   }%
 }
+\newcommand*\NewPage{\newpage\null\thispagestyle{empty}\newpage}
 
 \begin{document}
 \raggedbottom
@@ -60,8 +61,8 @@
   % nessuna numerazione
   \pagenumbering{gobble} 
   \input{pagina_iniziale}
-
   \clearpage
+  \NewPage
  
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -97,14 +98,13 @@
     % indice
     \tableofcontents
     \clearpage
-    
+    \NewPage
     
           
     % gruppo per definizone di successione capitoli senza interruzione di pagina
     \begingroup
       % nessuna interruzione di pagina tra capitoli
       % ridefinizione dei comandi di clear page
-      \renewcommand{\cleardoublepage}{} 
 
       % redefinizione del formato del titolo del capitolo
       % da formato
@@ -123,7 +123,7 @@
       % sommario
       \input{sommario}
       \clearpage
-      \renewcommand{\clearpage}{} 
+      \NewPage
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Nota
@@ -146,9 +146,13 @@
       % \input oppure \include
       %
       \input{intro}
+      \NewPage
       \input{soa}
+      \NewPage
       \input{design}
+      \NewPage
       \input{results}
+      \NewPage
       \input{conclusions}
       
     \endgroup
